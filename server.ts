@@ -313,7 +313,8 @@ app.get('/api/news/:id/explanation', async (req: Request, res: Response) => {
 
 // POST /api/news/:id/enrich - on-demand Gemini deep enrichment
 app.post('/api/news/:id/enrich', async (req: Request, res: Response) => {
-  const article = await newsService.enrichArticle(req.params.id);
+  const force = req.query.force === 'true' || req.body?.force === true;
+  const article = await newsService.enrichArticle(req.params.id, force);
   if (!article) {
     res.status(404).json({ error: 'Article not found' });
     return;
