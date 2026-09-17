@@ -1,0 +1,7 @@
+{
+  "name": "NewsLens",
+  "description": "Interactive news-learning platform for students with grounded real news, 7-day Weekly Practice cycles, Daily Challenges, simplified multi-level explanations, and forecasting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

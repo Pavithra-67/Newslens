@@ -1,0 +1,1071 @@
+{
+  "users": [
+    {
+      "id": "usr_student_demo",
+      "name": "Aarav Sharma",
+      "email": "student@newslens.edu",
+      "passwordHash": "7e62f7ff9ac3c692009c930377e8e7bd126cbe927ed5ee6a7a6d7bd371a657a13fe676e74c2da06cfee8f248ddb73dc860a94ba832498ae5a87a9c60478361c0",
+      "salt": "6e763676f994fa00ce13d32f493644cb",
+      "role": "student",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
+      "xp": 145,
+      "streakDays": 3,
+      "longestStreak": 5,
+      "lastCompletedDate": null,
+      "storiesReadCount": 6,
+      "savedArticleIds": [
+        "india-semiconductor-mission",
+        "spadex-space-docking-isro"
+      ],
+      "interests": [
+        "Science & Technology",
+        "Space",
+        "Business & Economy",
+        "Education"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 15,
+        "correct": 12,
+        "byCategory": {
+          "Science & Technology": {
+            "attempted": 8,
+            "correct": 7
+          },
+          "Space": {
+            "attempted": 4,
+            "correct": 3
+          },
+          "Business & Economy": {
+            "attempted": 3,
+            "correct": 2
+          }
+        }
+      },
+      "predictionStats": {
+        "total": 4,
+        "resolved": 2,
+        "correct": 2,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 1,
+          "maxProgress": 1,
+          "unlockedAt": "2026-09-10T10:00:00Z"
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 1,
+          "maxProgress": 1,
+          "unlockedAt": "2026-09-11T12:00:00Z"
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 7,
+          "maxProgress": 7,
+          "unlockedAt": "2026-09-12T08:00:00Z"
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 420,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 1,
+          "maxProgress": 1,
+          "unlockedAt": "2026-09-11T15:30:00Z"
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 3,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 4,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [
+        {
+          "articleId": "india-semiconductor-mission",
+          "timestamp": "2026-09-11T17:04:18.771Z"
+        },
+        {
+          "articleId": "spadex-space-docking-isro",
+          "timestamp": "2026-09-10T17:04:18.771Z"
+        }
+      ],
+      "createdAt": "2026-09-12T17:04:18.771Z"
+    },
+    {
+      "id": "usr_pavi_default",
+      "name": "Pavithra Sankari",
+      "email": "pavi.sankari26@gmail.com",
+      "passwordHash": "e717f04c6a2e8543d861ba801bd4a92b31bc5efa459edfc5cca4ad3f116bc6538632dd970c83bbd152fde20fbb777d42a0d1ac0e88e14441904953e9ed20f21e",
+      "salt": "30d12c4d1959d5f907e4f23ca052353a",
+      "role": "student",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
+      "xp": 640,
+      "streakDays": 1,
+      "longestStreak": 12,
+      "lastCompletedDate": "2026-09-17",
+      "storiesReadCount": 18,
+      "savedArticleIds": [
+        "india-semiconductor-mission",
+        "spadex-space-docking-isro"
+      ],
+      "interests": [
+        "Science & Technology",
+        "Space",
+        "Business & Economy",
+        "Education"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 35,
+        "correct": 26,
+        "byCategory": {
+          "Science & Technology": {
+            "attempted": 12,
+            "correct": 11
+          },
+          "Space": {
+            "attempted": 8,
+            "correct": 7
+          },
+          "Business & Economy": {
+            "attempted": 5,
+            "correct": 4
+          }
+        }
+      },
+      "predictionStats": {
+        "total": 17,
+        "resolved": 4,
+        "correct": 3,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 1,
+          "maxProgress": 1,
+          "unlockedAt": "2026-09-10T10:00:00Z"
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 1,
+          "maxProgress": 1,
+          "unlockedAt": "2026-09-11T12:00:00Z"
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 1,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 420,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 1,
+          "maxProgress": 1,
+          "unlockedAt": "2026-09-11T15:30:00Z"
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 3,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 4,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [
+        {
+          "articleId": "india-semiconductor-mission",
+          "timestamp": "2026-09-11T17:04:44.651Z"
+        },
+        {
+          "articleId": "spadex-space-docking-isro",
+          "timestamp": "2026-09-10T17:04:44.651Z"
+        }
+      ],
+      "createdAt": "2026-09-12T17:04:44.651Z"
+    },
+    {
+      "id": "usr_54f29ea636b72baa",
+      "name": "Priya Patel",
+      "email": "priya.patel@example.com",
+      "passwordHash": "85684c7e4a66a7cd18bd9e047427d28bbaae9bf0cfdee25cb52d68fdbc8cae5444e78e8f55b851454522fec21f79ddf5f370503bb7df0cde689e89d40fc374ad",
+      "salt": "688a63b35944ae8b8789612b26c128bf",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Priya%20Patel",
+      "xp": 0,
+      "streakDays": 0,
+      "longestStreak": 0,
+      "lastCompletedDate": null,
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 0,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-12T17:04:56.168Z"
+    },
+    {
+      "id": "usr_d987d7ff75091f4c",
+      "name": "Alex Test",
+      "email": "testuser_1789602114096@example.com",
+      "passwordHash": "5cd17c63cb6ea13b12612af7a04011b34846b7bdccdbc455b0ce771253afbc433f0e5c4f61604da90a976c05b8479e90bdcb510f1c977d95615b60306d7bbcfa",
+      "salt": "d373d7cf513f511c9dee34319066ab92",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alex%20Test",
+      "xp": 0,
+      "streakDays": 0,
+      "longestStreak": 0,
+      "lastCompletedDate": null,
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 0,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-16T23:41:54.234Z"
+    },
+    {
+      "id": "usr_d193f52d0e35d44f",
+      "name": "Alex Test",
+      "email": "testuser_1789602141292@example.com",
+      "passwordHash": "5cf6a6eadb0b4f6b2c56c880c11c80a4bfc4a6d854bf1a915fd65d6e2b6fc915090c364b4d6c687391c2a81b8cf1c99ee80d247450c19cdd99ed74b25a281c08",
+      "salt": "37ff0faa11c6cd9e78738f2c689222f9",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alex%20Test",
+      "xp": 25,
+      "streakDays": 1,
+      "longestStreak": 1,
+      "lastCompletedDate": "2026-09-16",
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 5,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 1,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-16T23:42:21.432Z"
+    },
+    {
+      "id": "usr_70788da1e724db04",
+      "name": "Alex Test",
+      "email": "testuser_1789602151396@example.com",
+      "passwordHash": "b133fbc22997a9720532fbb22be5582997d4cab1d81f731bd9147977ddf8897bb73bb22730cc9e74ccd2634abb9a7aedc0e4b4e07f9bf124dcc785f49b24c059",
+      "salt": "c09103cb16317f827f288b34be886284",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alex%20Test",
+      "xp": 25,
+      "streakDays": 1,
+      "longestStreak": 1,
+      "lastCompletedDate": "2026-09-16",
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 5,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 1,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-16T23:42:31.534Z"
+    },
+    {
+      "id": "usr_e1144cb0d152d9b4",
+      "name": "Alex Test",
+      "email": "testuser_1789602165216@example.com",
+      "passwordHash": "5f88a1e88e82b04fa10c992cd98227db6fbf10d509df1644bc8e356b3859b5766cca0a552cbeae3a938c74f649bf8e370cdccceafed7d2a9bb153109115a6aa6",
+      "salt": "bf4dc86b66a843bf2d9621a938fae2be",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alex%20Test",
+      "xp": 25,
+      "streakDays": 1,
+      "longestStreak": 1,
+      "lastCompletedDate": "2026-09-16",
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 5,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 1,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-16T23:42:45.359Z"
+    },
+    {
+      "id": "usr_f55f624190ec6a59",
+      "name": "Alex Test",
+      "email": "testuser_1789602173365@example.com",
+      "passwordHash": "c7c5ff0ce9fb97b60784e7348d6baa12414a2110207134d862def66facff5a03e93518c8633d492e21af403057b56210ab032690055f64440ddfae843398e307",
+      "salt": "bd9e0a4f6249bd79a103042eeaf379ad",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alex%20Test",
+      "xp": 25,
+      "streakDays": 1,
+      "longestStreak": 1,
+      "lastCompletedDate": "2026-09-16",
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 5,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 1,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 1,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-16T23:42:53.496Z"
+    },
+    {
+      "id": "usr_7f44cb7e2b126f6f",
+      "name": "Alex Test",
+      "email": "testuser_1789602178731@example.com",
+      "passwordHash": "1d5d26c89cb4792392818604427fb75c77cda633c5067459b89f2ae98c062c8cd750c42b9f7961a06c106a038889fee9d7e2c72d4318dd53f499a37fcbce49e2",
+      "salt": "3cbe950d2fde5558b583fda95c5f7043",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alex%20Test",
+      "xp": 25,
+      "streakDays": 1,
+      "longestStreak": 1,
+      "lastCompletedDate": "2026-09-16",
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 5,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 1,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 1,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-16T23:42:58.857Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "sess_746fb4a434f3e0ce65d38ac17010233764f26989312bcfdd",
+      "userId": "usr_pavi_default",
+      "createdAt": "2026-09-12T17:04:45.905Z",
+      "expiresAt": "2026-10-12T17:04:45.905Z"
+    },
+    {
+      "token": "sess_714410d9ebedc68c51e992eca0d40edaa4394de0257630d1",
+      "userId": "usr_pavi_default",
+      "createdAt": "2026-09-12T17:04:50.066Z",
+      "expiresAt": "2026-10-12T17:04:50.066Z"
+    },
+    {
+      "token": "sess_cc7432e83ce166d67f5da0c938306763c110681625df1897",
+      "userId": "usr_54f29ea636b72baa",
+      "createdAt": "2026-09-12T17:04:56.168Z",
+      "expiresAt": "2026-10-12T17:04:56.168Z"
+    },
+    {
+      "token": "sess_d4be2ebc8faefbd4e23f80dbbde4ec65f6f1f11e9448a0f4",
+      "userId": "usr_pavi_default",
+      "createdAt": "2026-09-16T23:19:51.566Z",
+      "expiresAt": "2026-10-16T23:19:51.566Z"
+    },
+    {
+      "token": "sess_340b28a910ed18037b594ccce9c735c40689a5d1797b9bd6",
+      "userId": "usr_d987d7ff75091f4c",
+      "createdAt": "2026-09-16T23:41:54.235Z",
+      "expiresAt": "2026-10-16T23:41:54.235Z"
+    },
+    {
+      "token": "sess_107c2913d1db3b321420f76dbf47d8d8629f11143db0199a",
+      "userId": "usr_d193f52d0e35d44f",
+      "createdAt": "2026-09-16T23:42:21.433Z",
+      "expiresAt": "2026-10-16T23:42:21.433Z"
+    },
+    {
+      "token": "sess_17e4a2b17e929a67b82482a11200d51a3c25841f013a0435",
+      "userId": "usr_70788da1e724db04",
+      "createdAt": "2026-09-16T23:42:31.535Z",
+      "expiresAt": "2026-10-16T23:42:31.535Z"
+    },
+    {
+      "token": "sess_e6d98ce05ef17b41058ccc7aeb0c48b1f72f4808107d18c0",
+      "userId": "usr_e1144cb0d152d9b4",
+      "createdAt": "2026-09-16T23:42:45.359Z",
+      "expiresAt": "2026-10-16T23:42:45.359Z"
+    },
+    {
+      "token": "sess_e880ddec56555c6ffbdb0d3a6609643a8aa64cec92cad6fe",
+      "userId": "usr_f55f624190ec6a59",
+      "createdAt": "2026-09-16T23:42:53.496Z",
+      "expiresAt": "2026-10-16T23:42:53.496Z"
+    },
+    {
+      "token": "sess_cb04588655c478af10aec76cfeeaa5d7cc1d9e9f3d006edc",
+      "userId": "usr_7f44cb7e2b126f6f",
+      "createdAt": "2026-09-16T23:42:58.858Z",
+      "expiresAt": "2026-10-16T23:42:58.858Z"
+    }
+  ],
+  "dailyCompletions": [
+    {
+      "id": "comp_5e2761ce553279ba",
+      "userId": "usr_pavi_default",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-12",
+      "score": 0,
+      "totalQuestions": 5,
+      "xpAwarded": 25,
+      "answers": {
+        "dq-1": 1,
+        "dq-2": 1,
+        "dq-3": 1,
+        "dq-4": 1,
+        "dq-5": 1
+      },
+      "completedAt": "2026-09-12T17:04:50.135Z"
+    },
+    {
+      "id": "comp_89367f0b2cec0573",
+      "userId": "usr_pavi_default",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-17",
+      "score": 4,
+      "totalQuestions": 5,
+      "xpAwarded": 85,
+      "answers": {
+        "q1-semiconductor": 1,
+        "q2-spadex": 1,
+        "q3-repo-rate": 0,
+        "q4-ncrf": 1,
+        "q5-solid-state": 0
+      },
+      "completedAt": "2026-09-16T23:21:46.903Z"
+    },
+    {
+      "id": "comp_68c18e41ed89138c",
+      "userId": "usr_d193f52d0e35d44f",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-16",
+      "score": 0,
+      "totalQuestions": 5,
+      "xpAwarded": 25,
+      "answers": {
+        "dc-q1": 1,
+        "dc-q2": 1,
+        "dc-q3": 0
+      },
+      "completedAt": "2026-09-16T23:42:21.456Z"
+    },
+    {
+      "id": "comp_9e7f75d9462ac4cb",
+      "userId": "usr_70788da1e724db04",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-16",
+      "score": 0,
+      "totalQuestions": 5,
+      "xpAwarded": 25,
+      "answers": {
+        "dc-q1": 1,
+        "dc-q2": 1,
+        "dc-q3": 0
+      },
+      "completedAt": "2026-09-16T23:42:31.558Z"
+    },
+    {
+      "id": "comp_195e95d303d590f0",
+      "userId": "usr_e1144cb0d152d9b4",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-16",
+      "score": 0,
+      "totalQuestions": 5,
+      "xpAwarded": 25,
+      "answers": {
+        "dc-q1": 1,
+        "dc-q2": 1,
+        "dc-q3": 0
+      },
+      "completedAt": "2026-09-16T23:42:45.381Z"
+    },
+    {
+      "id": "comp_2235bce6eca57aa7",
+      "userId": "usr_f55f624190ec6a59",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-16",
+      "score": 0,
+      "totalQuestions": 5,
+      "xpAwarded": 25,
+      "answers": {
+        "dc-q1": 1,
+        "dc-q2": 1,
+        "dc-q3": 0
+      },
+      "completedAt": "2026-09-16T23:42:53.515Z"
+    },
+    {
+      "id": "comp_fcc2ea53377e310b",
+      "userId": "usr_7f44cb7e2b126f6f",
+      "quizId": "daily-2026-09-12",
+      "quizDate": "2026-09-16",
+      "score": 0,
+      "totalQuestions": 5,
+      "xpAwarded": 25,
+      "answers": {
+        "dc-q1": 1,
+        "dc-q2": 1,
+        "dc-q3": 0
+      },
+      "completedAt": "2026-09-16T23:42:58.877Z"
+    }
+  ]
+}
