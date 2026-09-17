@@ -1,0 +1,104 @@
+{
+  "2026-W38": {
+    "id": "weekly-2026-W38",
+    "weekNumber": 38,
+    "title": "Weekly Practice: Sep 14 – Sep 20, 2026",
+    "description": "Test your mastery of current news stories from the week of Sep 14 – Sep 20, 2026. Complete once per 7-day cycle.",
+    "questions": [
+      {
+        "id": "q-semi-1",
+        "question": "What percentage of capital expenditure does the India Semiconductor Mission subsidize for approved commercial fabs?",
+        "type": "multiple_choice",
+        "options": [
+          "25%",
+          "50%",
+          "75%",
+          "100%"
+        ],
+        "correctIndex": 1,
+        "explanation": "Under the India Semiconductor Mission (ISM), the central government covers 50% of the project capital expenditure on an equal footing.",
+        "xpReward": 20,
+        "category": "India",
+        "articleId": "india-semiconductor-mission-fabs"
+      },
+      {
+        "id": "q-spadex-1",
+        "question": "Why is autonomous space docking crucial for the Bharatiya Antariksh Station?",
+        "type": "multiple_choice",
+        "options": [
+          "To clean solar panels with brushes",
+          "To join separate pressurized modules and spacecraft together in orbit",
+          "To steer satellites away from the Sun",
+          "To refuel airplanes flying in the atmosphere"
+        ],
+        "correctIndex": 1,
+        "explanation": "A modular space station is built by launching separate modules on rockets and joining (docking) them together in orbit.",
+        "xpReward": 20,
+        "category": "Space",
+        "articleId": "isro-spadex-docking-mission"
+      },
+      {
+        "id": "wp-2026-W38-q1",
+        "question": "What is the primary objective of India's Semiconductor Mission?",
+        "type": "multiple_choice",
+        "options": [
+          "To subsidize commercial wafer fabs and create domestic hardware supply chains",
+          "To ban international chip trading",
+          "To replace software engineers with hardware technicians",
+          "To manufacture solar panels only"
+        ],
+        "correctIndex": 0,
+        "explanation": "The India Semiconductor Mission (ISM) provides 50% capital expenditure support to construct commercial wafer fabrication plants domestically.",
+        "xpReward": 25,
+        "category": "India"
+      },
+      {
+        "id": "wp-2026-W38-q2",
+        "question": "What technology does ISRO's SPADEX mission test for future modular space stations?",
+        "type": "multiple_choice",
+        "options": [
+          "Autonomous rendezvous and docking in low-Earth orbit",
+          "Atmospheric weather balloon tracking",
+          "Deep ocean submarine communication",
+          "Mining ice on asteroids"
+        ],
+        "correctIndex": 0,
+        "explanation": "SPADEX tests autonomous rendezvous and docking (AR&D), essential for assembling the Bharatiya Antariksh Station.",
+        "xpReward": 25,
+        "category": "Space"
+      },
+      {
+        "id": "wp-2026-W38-q3",
+        "question": "Why are utility-scale battery storage systems expanding in clean energy grids?",
+        "type": "multiple_choice",
+        "options": [
+          "To store excess solar and wind power and supply electricity when sunlight or wind is unavailable",
+          "To increase fossil fuel combustion",
+          "To replace residential power lines",
+          "To produce radioactive steam"
+        ],
+        "correctIndex": 0,
+        "explanation": "Battery energy storage systems (BESS) smooth out intermittent renewable generation and balance power grids.",
+        "xpReward": 25,
+        "category": "Environment"
+      },
+      {
+        "id": "wp-2026-W38-q4",
+        "question": "What is a major differentiator of central bank digital currency (CBDC) compared to standard commercial bank apps?",
+        "type": "multiple_choice",
+        "options": [
+          "CBDC is a direct digital sovereign liability of the central bank that can support offline legal tender settlement",
+          "CBDC is completely unregulated and volatile",
+          "CBDC can only be used in foreign airports",
+          "CBDC requires paper tokens to activate"
+        ],
+        "correctIndex": 0,
+        "explanation": "CBDC represents sovereign currency issued directly by the central monetary authority rather than commercial bank balances.",
+        "xpReward": 25,
+        "category": "Business"
+      }
+    ],
+    "xpTotal": 140,
+    "completed": false
+  }
+}

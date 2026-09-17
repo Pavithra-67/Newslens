@@ -986,6 +986,99 @@
       ],
       "readHistory": [],
       "createdAt": "2026-09-17T00:51:38.232Z"
+    },
+    {
+      "id": "usr_528951060c73c546",
+      "name": "sankari",
+      "email": "sankari65566@gmail.com",
+      "passwordHash": "8606db93bfb3a8cb5e9f1d15aa6223aa80682a28001146e00953e84684457731345d68a2558bd35eb1e143e9cd0d293d5cbccc6d37df7f450dce02ebb0dbb3ee",
+      "salt": "b6f974b429e0e290572530fafdaa07ec",
+      "role": "student",
+      "avatar": "",
+      "xp": 0,
+      "streakDays": 0,
+      "longestStreak": 0,
+      "lastCompletedDate": null,
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 0,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-17T02:33:40.892Z"
     }
   ],
   "sessions": [
