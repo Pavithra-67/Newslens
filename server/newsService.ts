@@ -1,12 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import https from 'https';
-import { Article, NewsCategory, QuizQuestion, WeeklyChallenge } from '../src/types';
+import { Article, NewsCategory, QuizQuestion, WeeklyChallenge, ExplanationStyle } from '../src/types';
 import { getGeminiClient } from './gemini';
 import { WeeklyCycleInfo } from './db';
+import { MOCK_ARTICLES } from '../src/data/mockArticles';
 
 const CACHE_FILE_PATH = path.join(process.cwd(), 'data', 'real_news_cache.json');
 const WEEKLY_CACHE_PATH = path.join(process.cwd(), 'data', 'weekly_challenge_cache.json');
+const EXPLANATIONS_CACHE_PATH = path.join(process.cwd(), 'data', 'explanations_cache.json');
 
 // Ensure data folder exists
 const dataDir = path.dirname(CACHE_FILE_PATH);
@@ -52,9 +54,80 @@ export const REAL_ARTICLES_SEED: Article[] = [
     whatHappened: 'The Union Cabinet cleared three major commercial semiconductor manufacturing and packaging projects in Dholera and Sanand (Gujarat) and Morigaon (Assam). Tata Electronics partnered with Taiwan’s Powerchip Semiconductor Manufacturing Corp (PSMC) to construct India\'s first commercial 300mm silicon wafer fab.',
     inSimpleWords: 'Semiconductors are the tiny chips inside smartphones, electric cars, and satellites. India previously imported virtually all microchips. The country is now constructing its own mega-factories so critical hardware can be fabricated domestically.',
     explanationModes: {
-      simple: 'Microchips are tiny brains inside every electronic device. When global shipping gets stuck, factories worldwide shut down. India is spending public and private funds to build local chip foundries so we can manufacture our own hardware.',
-      student: 'Under the India Semiconductor Mission (ISM), the government subsidizes 50% of the project capital expenditure. Tata and PSMC are setting up a 28nm/55nm/90nm fab with a capacity of 50,000 wafer starts per month, supplying automotive, power electronics, and computing sectors.',
-      detailed: 'Front-end fabrication requires ultra-cleanrooms and lithography on silicon wafers. Due to supply chain concentration in East Asia, nations are aggressively reshoring semiconductor capabilities. India is focusing initially on mature nodes (28nm–90nm), which comprise over 65% of global chip demand for electric vehicles, telecom, and industrial automation.'
+      simple: `WHAT HAPPENED?
+India's government approved three new chip factories in Gujarat and Assam, spending ₹1.26 lakh crore together with private companies. Tata Electronics is teaming up with a Taiwan chipmaker called PSMC to build India's very first commercial computer chip factory.
+
+WHO IS INVOLVED?
+The main groups involved are the Indian government, Tata Electronics, PSMC from Taiwan, and CG Power. They are providing the funding, land, and technology to build these mega-factories.
+
+WHY DOES IT MATTER?
+Computer chips are the tiny brains inside smartphones, cars, medical equipment, and electric power grids. Almost all chips used in India were imported from other countries. Making them locally ensures factories stay running even during global shortages.
+
+IN ONE LINE
+India is spending ₹1.26 lakh crore to build its own computer chip factories so it doesn't depend entirely on foreign imports.`,
+      student: `WHAT HAPPENED?
+The Union Cabinet approved three commercial semiconductor manufacturing and packaging projects worth ₹1.26 lakh crore ($15.2 billion). Tata Electronics and Taiwan's PSMC will establish a 300mm commercial wafer fabrication foundry in Dholera, Gujarat, while packaging hubs launch in Sanand and Morigaon.
+
+THE BACKGROUND
+Under the India Semiconductor Mission (ISM) launched in 2021, the government committed ₹76,000 crore in incentives. While India already designs nearly 20% of the world's microchips through engineering hubs in Bengaluru and Hyderabad, it lacked domestic physical foundries (fabs) to manufacture the actual silicon wafers.
+
+KEY TERMS
+• Semiconductor Fab — An ultra-clean manufacturing facility where circuits are etched onto silicon wafers using light and chemicals.
+• Mature Node (28nm–90nm) — Chip manufacturing technologies used for power electronics, automotive sensors, and telecom rather than phone CPUs.
+• ATMP / OSAT — Assembly, Testing, Marking, and Packaging of silicon wafers into finished, usable microchip units.
+• Silicon Wafer — A thin slice of pure crystalline silicon used as the substrate for microchip transistors.
+
+WHY IT MATTERS
+This initiative bridges the gap between academic chip design and industrial manufacturing. It connects directly to STEM coursework in electronics, materials science, VLSI design, and chemical engineering, creating thousands of high-tech jobs across India.
+
+STUDENT TAKEAWAY
+Physical manufacturing of microchips requires immense capital and cleanroom precision, turning theoretical electronics knowledge into vital national infrastructure.
+
+THINK ABOUT IT
+Why do countries view domestic chip fabrication as a matter of national security rather than just regular business?`,
+      detailed: `OVERVIEW
+India has cleared three commercial semiconductor projects totaling ₹1.26 lakh crore ($15.2 billion) under the India Semiconductor Mission (ISM). The cornerstone project is a joint venture between Tata Electronics and Taiwan's Powerchip Semiconductor Manufacturing Corp (PSMC) to build India's first commercial 300mm wafer fabrication plant in Dholera, Gujarat.
+
+WHAT HAPPENED?
+The Union Cabinet cleared three facilities:
+1. Tata-PSMC commercial wafer fab in Dholera (Gujarat) with ₹91,000 crore investment.
+2. Tata Electronics semiconductor packaging facility in Morigaon (Assam) with ₹27,000 crore investment.
+3. CG Power with Renesas (Japan) and Stars Microelectronics (Thailand) packaging unit in Sanand (Gujarat) with ₹7,600 crore investment.
+
+BACKGROUND
+Global semiconductor supply disruptions during 2020–2022 idled automobile and consumer electronic assembly lines worldwide. Recognizing that concentration of wafer fabrication in the Taiwan Strait poses systemic supply-chain vulnerability, India launched the ISM incentive scheme offering a 50% capital expenditure subsidy on an equal footing with state governments providing additional fiscal top-ups.
+
+KEY PLAYERS / STAKEHOLDERS
+• Tata Electronics: Leading domestic industrial conglomerate anchoring both the Dholera fab and Morigaon packaging unit.
+• PSMC (Taiwan): Providing front-end manufacturing technology transfer, licensing, and cleanroom operational blueprints.
+• Ministry of Electronics and IT (MeitY): Overseeing disbursement of ISM central subsidies and infrastructure provisioning.
+• Renesas & Stars Microelectronics: International partners bringing packaging expertise to the Sanand facility.
+
+HOW IT WORKS / WHY IT HAPPENED
+Front-end fabrication prints billions of nanometer-scale transistors onto circular silicon wafers using photolithography, chemical vapor deposition, and ion implantation. The Dholera plant will target 28nm, 40nm, 55nm, and 90nm mature process nodes, which power automotive engine control units, power management ICs, telecom transceivers, and smart meters.
+
+TIMELINE
+• December 2021: Indian Government announces ₹76,000 crore ISM policy.
+• February 2024: Union Cabinet formally approves Tata-PSMC and CG Power projects.
+• 2024–2025: Site civil engineering, water and ultra-pure gas pipeline commissioning.
+• 2026–2027: Cleanroom tool installation and initial test wafer fabrication runs.
+
+IMPACT
+• Direct Employment: Generates an estimated 20,000 high-technology engineering jobs and over 100,000 indirect roles.
+• Strategic Resilience: Insulates domestic defense electronics, automotive manufacturing, and 5G/6G infrastructure from international shipping blockades.
+• Economic Impact: Reduces semiconductor import bills, projected to exceed $100 billion annually by 2030 without domestic capacity.
+
+DIFFERENT VIEWS
+Supporters emphasize that mature nodes (28nm+) account for over 65% of global hardware volume and offer faster commercial viability than leading-edge 3nm nodes. Critics and industry observers note that fabs require tens of millions of liters of uninterrupted ultra-pure water and zero-flicker electrical grids daily, demanding rigorous local utility execution in Dholera.
+
+WHAT IS STILL UNKNOWN?
+Specific customer off-take agreements, initial wafer yield rates, and the timeline for migrating from mature nodes to sub-20nm nodes remain subject to commercial tool delivery schedules from global equipment vendors like ASML and Applied Materials.
+
+KEY TAKEAWAYS
+• India is building its first commercial 300mm wafer fab in Dholera in partnership with Taiwan's PSMC.
+• The ₹1.26 lakh crore push is supported by a 50% central capex subsidy under the India Semiconductor Mission.
+• Fabs focus on 28nm–90nm chips powering automotive, industrial IoT, and telecom systems.
+• Complementary packaging plants in Assam and Gujarat create an end-to-end domestic supply chain.`
     },
     whyShouldICare: [
       {
@@ -119,9 +192,80 @@ export const REAL_ARTICLES_SEED: Article[] = [
     whatHappened: 'ISRO finalized testing for the Space Docking Experiment (SPADEX), launching two spacecraft—a Chaser and a Target—on a single PSLV. The satellites will separate, perform orbital phasing, and autonomously navigate together to dock using laser and optical sensors.',
     inSimpleWords: 'Docking means joining two spacecraft together while flying at 28,000 km/h in space. Perfecting this technique is essential for building India’s future space station and bringing samples back from the Moon.',
     explanationModes: {
-      simple: 'Two robotic satellites will connect together in space. Spacecraft must know how to find and link with each other safely to construct space stations.',
-      student: 'Autonomous rendezvous and docking (AR&D) requires laser rangefinders, star trackers, and cold-gas thrusters. SPADEX validates both the mechanical latching mechanisms and guidance algorithms.',
-      detailed: 'Orbital rendezvous entails solving Clohessy-Wiltshire relative motion equations in microgravity. Once within 15 meters, optical sensors guide the chaser to soft-capture latches.'
+      simple: `WHAT HAPPENED?
+India's space agency ISRO is sending two satellites into space on a single rocket. Once in space, the two satellites will separate, fly apart, and then carefully find each other and lock together like two building blocks.
+
+WHO IS INVOLVED?
+ISRO, India's national space agency, designed and built both satellites and will launch them from Sriharikota in Andhra Pradesh.
+
+WHY DOES IT MATTER?
+Connecting two spacecraft in orbit is called docking. Space stations cannot be launched in one piece because rockets aren't big enough. Astronauts must launch modules one by one and connect them in space. This test proves India knows how to connect spacecraft safely.
+
+IN ONE LINE
+ISRO is testing robotic space docking so India can build its own space station and bring samples back from the Moon.`,
+      student: `WHAT HAPPENED?
+ISRO has finalized preparations for the Space Docking Experiment (SPADEX). Two spacecraft—dubbed the 'Chaser' and the 'Target'—will launch aboard a single PSLV rocket, separate in low-Earth orbit, and autonomously rendezvous and dock using laser rangefinders and optical guidance.
+
+THE BACKGROUND
+Until now, ISRO missions focused on launching satellites into precise orbits and sending probes to the Moon and Mars. However, human space exploration and modular space station construction require two independently flying vehicles to match velocities at 28,000 km/h and lock together without damaging each other.
+
+KEY TERMS
+• Autonomous Rendezvous — The navigational process where two spacecraft find and approach each other in orbit without real-time commands from Earth.
+• Docking Mechanism — The physical latches, seals, and rings that mechanically lock two spacecraft together and allow transfer of power or crew.
+• Phasing Orbit — An orbital maneuver used to adjust the distance between two spacecraft by placing one in a slightly different orbital altitude.
+• LIDAR / Laser Guidance — Laser-based distance and angle measuring sensors that guide the final approach down to millimeter precision.
+
+WHY IT MATTERS
+Mastering autonomous docking is the critical prerequisite for the planned Bharatiya Antariksh Station (BAS) and the Chandrayaan-4 lunar sample return mission. It introduces students to aerospace engineering, orbital dynamics, robotics, and automated control systems.
+
+STUDENT TAKEAWAY
+Docking in space requires solving complex orbital physics (Clohessy-Wiltshire equations) where speeding up actually moves a spacecraft into a higher, slower orbit.
+
+THINK ABOUT IT
+Why is real-time human joystick steering from Earth impossible during the final centimeters of orbital docking?`,
+      detailed: `OVERVIEW
+The Space Docking Experiment (SPADEX) is a twin-satellite technology demonstration mission developed by ISRO. Launching as co-passengers on a Polar Satellite Launch Vehicle (PSLV), the Chaser and Target spacecraft will demonstrate autonomous rendezvous, proximity operations, and soft-capture mechanical docking in low-Earth orbit (LEO).
+
+WHAT HAPPENED?
+ISRO integrated two spacecraft weighing approximately 200–220 kg each into a unified PSLV payload. After orbital insertion:
+1. The Target satellite and Chaser satellite will separate.
+2. The Chaser will enter a phasing orbit to create separation distance of up to several kilometers.
+3. Using onboard sensors, the Chaser will autonomously re-approach the Target, execute station-keeping at hold points, and initiate final latching.
+
+BACKGROUND
+Every modular space station in history (Mir, ISS, Tiangong) relies on orbital docking. India's roadmap includes the first module of the Bharatiya Antariksh Station by 2028 and a crewed lunar landing by 2040. Docking is also essential for Chandrayaan-4, where an ascent module must transfer lunar soil samples to a return module in lunar orbit.
+
+KEY PLAYERS / STAKEHOLDERS
+• ISRO Satellite Centre (URSC): Designed and fabricated the Chaser and Target satellites.
+• Liquid Propulsion Systems Centre (LPSC): Developed the cold-gas thrusters and reaction control systems for millimeter-precise velocity tweaks.
+• Vikram Sarabhai Space Centre (VSSC): Engineered the guidance, navigation, and control (GNC) algorithms.
+• Indian Aerospace Vendors: Supplied specialized mechanical latching pins, laser rangefinders, and star sensors.
+
+HOW IT WORKS / WHY IT HAPPENED
+Orbital mechanics requires solving relative motion in microgravity. To catch up with a target ahead, a spacecraft cannot simply accelerate forward—doing so raises its orbit and slows its angular velocity. Instead, the Chaser lowers its altitude to orbit faster, then burns thrusters to rendezvous. Within 15 meters, LIDAR and optical cameras take over from GPS/NavIC, guiding soft-capture latches before hard-lock pins seal the interface.
+
+TIMELINE
+• 2017: SPADEX project approved and initial mechanical concepts drafted.
+• 2022–2024: Ground simulation on air-bearing tables and hardware-in-the-loop sensor testing.
+• 2025–2026: Flight model qualification and launch integration at Sriharikota.
+• Flight Phase: Multi-week orbital phasing, proximity test, docking, and subsequent undocking trials.
+
+IMPACT
+• Technological Independence: Makes India one of only four space-faring nations (after Russia, USA, and China) with autonomous orbital docking capability.
+• Strategic Capabilities: Enables satellite servicing, refueling, orbital debris remediation, and multi-module space station assembly.
+• Deep Space Exploration: Lays the foundation for sample-return missions and interplanetary staging.
+
+DIFFERENT VIEWS
+Aerospace analysts praise ISRO's cost-effective twin-satellite approach using a single PSLV. Observers note that while automated docking of small satellites is an essential milestone, docking heavy crewed capsules (such as Gaganyaan) will require much larger and heavier docking rings with environmental seals.
+
+WHAT IS STILL UNKNOWN?
+Whether the mission will conduct multiple undock-and-redock cycles during its operational lifespan, and the exact telemetry latency observed during autonomous handover.
+
+KEY TAKEAWAYS
+• SPADEX tests autonomous rendezvous and docking between two satellites launched on one PSLV.
+• Validates laser rangefinding, optical sensors, cold-gas thrusters, and mechanical capture latches.
+• Foundational technology for the Bharatiya Antariksh Station and Chandrayaan-4 lunar sample return.
+• Demonstrates mastery of microgravity relative orbital mechanics.`
     },
     whyShouldICare: [
       { target: 'Students', impact: 'Opens practical engineering pathways in aerospace guidance, navigation, and robotic vision.', isCertain: true }
@@ -326,9 +470,11 @@ class RealNewsService {
   private rateLimitUntil: number = 0;
   private inFlightFetches: Map<string, Promise<any>> = new Map();
   private categoryFetchedAt: Record<string, number> = {};
+  private explanationCache: Map<string, { explanation: string; createdAt: number }> = new Map();
 
   constructor() {
     this.loadCache();
+    this.loadExplanationCache();
     if (this.articles.length === 0) {
       this.articles = [...REAL_ARTICLES_SEED];
       this.saveCache();
@@ -344,6 +490,40 @@ class RealNewsService {
     }
   }
 
+  private loadExplanationCache() {
+    try {
+      if (fs.existsSync(EXPLANATIONS_CACHE_PATH)) {
+        const raw = fs.readFileSync(EXPLANATIONS_CACHE_PATH, 'utf-8');
+        const data = JSON.parse(raw);
+        if (typeof data === 'object' && data !== null) {
+          for (const [k, v] of Object.entries(data)) {
+            if (v && typeof (v as any).explanation === 'string') {
+              this.explanationCache.set(k, {
+                explanation: (v as any).explanation,
+                createdAt: (v as any).createdAt || Date.now()
+              });
+            }
+          }
+          console.log(`[NewsService] Loaded ${this.explanationCache.size} mode explanations from disk.`);
+        }
+      }
+    } catch (e) {
+      console.warn('[NewsService] Could not load explanations cache:', e);
+    }
+  }
+
+  private saveExplanationCache() {
+    try {
+      const obj: Record<string, { explanation: string; createdAt: number }> = {};
+      for (const [k, v] of this.explanationCache.entries()) {
+        obj[k] = v;
+      }
+      fs.writeFileSync(EXPLANATIONS_CACHE_PATH, JSON.stringify(obj, null, 2), 'utf-8');
+    } catch (e) {
+      console.error('[NewsService] Failed to save explanations cache:', e);
+    }
+  }
+
   private loadCache() {
     try {
       if (fs.existsSync(CACHE_FILE_PATH)) {
@@ -354,6 +534,29 @@ class RealNewsService {
           this.lastFetchedAt = data.lastFetchedAt || 0;
           this.categoryFetchedAt = data.categoryFetchedAt || {};
           console.log(`[NewsService] Loaded ${this.articles.length} cached articles from disk (Last fetched: ${new Date(this.lastFetchedAt).toISOString()})`);
+
+          // Ensure gold-standard seeds are always up to date and all articles have distinct, deep modes
+          for (const seed of REAL_ARTICLES_SEED) {
+            const idx = this.articles.findIndex(a => a.id === seed.id);
+            if (idx !== -1) {
+              this.articles[idx].explanationModes = { ...seed.explanationModes };
+            } else {
+              this.articles.unshift({ ...seed });
+            }
+          }
+
+          for (const article of this.articles) {
+            const modes = article.explanationModes || ({} as any);
+            const isIdentical = modes.simple && (modes.simple === modes.student || modes.simple === modes.detailed);
+            const isTooShort = !modes.simple || modes.simple.length < 250 || !modes.student || modes.student.length < 300;
+            if (isIdentical || isTooShort) {
+              article.explanationModes = {
+                simple: this.generateOfflineExplanation(article, 'simple'),
+                student: this.generateOfflineExplanation(article, 'student'),
+                detailed: this.generateOfflineExplanation(article, 'detailed')
+              };
+            }
+          }
         }
       }
     } catch (e) {
@@ -426,7 +629,7 @@ class RealNewsService {
    * Synchronous article retrieval by ID.
    */
   public getArticleSync(id: string): Article | undefined {
-    return this.articles.find(a => a.id === id);
+    return this.articles.find(a => a.id === id) || MOCK_ARTICLES.find(a => a.id === id);
   }
 
   /**
@@ -434,7 +637,10 @@ class RealNewsService {
    * Only calls Gemini when an article is opened, and caches the result permanently.
    */
   public async getArticleById(id: string): Promise<Article | undefined> {
-    const article = this.articles.find(a => a.id === id);
+    let article = this.articles.find(a => a.id === id);
+    if (!article) {
+      article = MOCK_ARTICLES.find(a => a.id === id);
+    }
     if (!article) return undefined;
 
     // If not yet enriched with student deep learning sections, enrich it now!
@@ -448,6 +654,415 @@ class RealNewsService {
     }
 
     return article;
+  }
+
+  /**
+   * Category-specific guidelines for mode-tailored generation.
+   */
+  private getCategoryGuidelines(category: NewsCategory): string {
+    switch (category as string) {
+      case 'Politics':
+      case 'National':
+      case 'India':
+      case 'World':
+        return `Category Focus (National / World / Governance):
+- Simple: Focus on who did what and how it directly affects everyday citizens or families. Keep political and governance concepts tangible.
+- Student: Explain constitutional, parliamentary, or institutional mechanisms, role of governance bodies, and civic processes.
+- Detailed: Analyze political dynamics, parliamentary context, legal/constitutional precedents, and policy implications.`;
+      case 'Science & Technology':
+        return `Category Focus (Science & Tech):
+- Simple: Use everyday analogies (e.g., comparing chips to tiny brains, or networks to highways). Avoid technical jargon.
+- Student: Explain core scientific principles, engineering challenges, and STEM curriculum connections. Define key technical terms clearly.
+- Detailed: Cover technical specifications, hardware/software architecture, manufacturing methodology, and industry landscape.`;
+      case 'Business & Economy':
+        return `Category Focus (Business & Economy):
+- Simple: Focus on prices, jobs, pocketbook costs, and company products in plain terms.
+- Student: Connect to economic concepts (supply and demand, inflation, GDP, market competition, capital expenditure).
+- Detailed: Analyze financial figures, balance sheet impacts, market capitalization, corporate strategy, and macroeconomic indicators.`;
+      case 'Environment & Climate':
+        return `Category Focus (Environment & Climate):
+- Simple: Focus on tangible nature, weather, air quality, animal, or local habitat impacts that anyone can visualize.
+- Student: Explain ecological systems, greenhouse gas science, climate cycles, and environmental geography concepts.
+- Detailed: Cover regulatory frameworks, environmental impact assessments, scientific consensus, renewable targets, and policy mechanisms.`;
+      case 'Space':
+        return `Category Focus (Space):
+- Simple: Highlight the wonder of exploration, what satellites do for people, and how rockets travel in space.
+- Student: Explain orbital mechanics, rocketry propulsion, telemetry, microgravity physics, and mission objectives.
+- Detailed: Detail spacecraft subsystems, launch vehicle specs, orbital parameters, international space agency comparisons, and long-term space doctrine.`;
+      case 'Sports':
+        return `Category Focus (Sports):
+- Simple: Focus on who won or lost, the match score, and the excitement of the moment.
+- Student: Connect to tournament rules, competitive strategy, training science, and historical records.
+- Detailed: Provide tactical analytics, player/team statistics, historical context, and tournament standings implications.`;
+      default:
+        return `Category Focus:
+- Simple: Everyday language, relatable real-world comparison.
+- Student: Academic terms, cause-and-effect reasoning, and subject connections.
+- Detailed: Thorough background, stakeholder positions, timeline, and long-term impact analysis.`;
+    }
+  }
+
+  /**
+   * Builds a high-precision prompt for Gemini to generate a specific explanation mode.
+   */
+  private buildExplanationPrompt(article: Article, mode: ExplanationStyle): string {
+    const categoryGuidance = this.getCategoryGuidelines(article.category);
+    const commonContext = `ARTICLE TITLE: ${article.title}
+CATEGORY: ${article.category}
+SOURCE: ${article.sourceName}
+PUBLISHED: ${article.publishedAt}
+HEADLINE / SUMMARY: ${article.headline || article.whatHappened || article.description}
+REPORTED DETAILS: ${article.whatHappened || ''} ${article.description || ''}
+KEY PLAYERS / CONTEXT: ${JSON.stringify(article.stakeholders || [])}
+TIMELINE HIGHLIGHTS: ${JSON.stringify(article.timeline || [])}
+WHY IT MATTERS: ${JSON.stringify(article.whyShouldICare || [])}`;
+
+    if (mode === 'simple') {
+      return `You are a warm, crystal-clear news explainer for NewsLens.
+Your mission is to explain the article below in SIMPLE MODE for a general reader or curious child (roughly 5th-grade reading level).
+
+CRITICAL CONSTRAINTS FOR SIMPLE MODE:
+- Vocabulary: Everyday words only. Absolutely NO technical jargon unless immediately explained with an intuitive metaphor.
+- Sentence structure: Short, punchy sentences (mostly under 15 words).
+- Comparisons: Include at least one relatable, real-world analogy or comparison that makes the concept instantly clear.
+- Target Length: 120 to 220 words.
+- Factual grounding: Use ONLY verified facts from the provided article. Do not invent details.
+
+${categoryGuidance}
+
+MANDATORY OUTPUT FORMAT:
+You MUST format your response using EXACTLY these four section headings in ALL CAPS:
+
+WHAT HAPPENED?
+[2-3 short, clear sentences explaining the core event in plain language with an analogy]
+
+WHO IS INVOLVED?
+[1-2 sentences listing the main people, countries, or organizations in everyday terms]
+
+WHY DOES IT MATTER?
+[2-3 sentences explaining how this affects regular people or why it is important]
+
+IN ONE LINE
+[A single crisp, punchy takeaway sentence that anyone can understand]
+
+${commonContext}
+
+Respond ONLY with the formatted text above. Do not include markdown code blocks or additional chatter.`;
+    }
+
+    if (mode === 'student') {
+      return `You are an engaging, educational mentor for NewsLens writing for middle school, high school, and undergraduate students.
+Your mission is to explain the article below in STUDENT MODE to help learners understand the concepts, background, and academic relevance.
+
+CRITICAL CONSTRAINTS FOR STUDENT MODE:
+- Tone: Educational, intellectually engaging, and structured.
+- Academic connections: Connect the news event to school or college subjects (such as physics, geography, civics, economics, biology, or history).
+- Key Terms: Include a distinct "KEY TERMS" section with 3 to 4 terms and concise 1-sentence definitions.
+- Reasoning: Emphasize cause-and-effect and why this event happened.
+- Reflection: Conclude with a thought-provoking "THINK ABOUT IT" question for students to ponder or discuss in class.
+- Target Length: 250 to 420 words.
+- Factual grounding: Faithfully ground every explanation in the provided article.
+
+${categoryGuidance}
+
+MANDATORY OUTPUT FORMAT:
+You MUST format your response using EXACTLY these section headings in ALL CAPS:
+
+WHAT HAPPENED?
+[A clear 2-3 sentence overview of the news event, setting up the key facts]
+
+THE BACKGROUND
+[1-2 paragraphs giving essential context, why this matters now, and what led to this situation]
+
+KEY TERMS
+• [Term 1] — [Concise, clear definition in 1 sentence]
+• [Term 2] — [Concise, clear definition in 1 sentence]
+• [Term 3] — [Concise, clear definition in 1 sentence]
+• [Term 4] — [Concise, clear definition in 1 sentence]
+
+WHY IT MATTERS
+[Explanation of real-world significance and how it relates to STEM, economics, or governance studies]
+
+STUDENT TAKEAWAY
+[A crisp 1-2 sentence principle or lesson students should remember]
+
+THINK ABOUT IT
+[A single insightful question prompting critical thinking or classroom discussion]
+
+${commonContext}
+
+Respond ONLY with the formatted text above. Do not include markdown code blocks or additional chatter.`;
+    }
+
+    // Detailed Mode
+    return `You are a senior investigative journalist and analytical editor for NewsLens.
+Your mission is to provide an in-depth, nuanced DETAILED MODE explanation of the article below for researchers, professionals, and policy enthusiasts.
+
+CRITICAL CONSTRAINTS FOR DETAILED MODE:
+- Depth & Tone: Comprehensive, analytical, objective, and intellectually rigorous.
+- Coverage: Detailed background, stakeholder perspectives, structural mechanisms, economic/social impacts, and unanswered questions.
+- Objectivity: Acknowledge multiple perspectives or potential challenges/criticisms where relevant.
+- Target Length: 450 to 700 words.
+- Factual grounding: Ground strictly in the facts and figures provided in the article.
+
+${categoryGuidance}
+
+MANDATORY OUTPUT FORMAT:
+You MUST format your response using EXACTLY these section headings in ALL CAPS:
+
+OVERVIEW
+[Executive summary of the news story and its strategic significance]
+
+WHAT HAPPENED?
+[Comprehensive factual breakdown of the events, decisions, and participants]
+
+BACKGROUND
+[Historical context, preceding developments, and structural factors that led to this]
+
+KEY PLAYERS / STAKEHOLDERS
+• [Stakeholder 1]: [Role, interests, and strategic stance]
+• [Stakeholder 2]: [Role, interests, and strategic stance]
+• [Stakeholder 3]: [Role, interests, and strategic stance]
+
+HOW IT WORKS / WHY IT HAPPENED
+[Detailed explanation of the technical, economic, or institutional mechanisms at play]
+
+TIMELINE
+• [Date/Milestone 1]: [Description]
+• [Date/Milestone 2]: [Description]
+• [Date/Milestone 3]: [Description]
+
+IMPACT
+[Multi-dimensional analysis covering economic, technological, civic, or environmental repercussions]
+
+DIFFERENT VIEWS
+[Analysis of different viewpoints, stakeholder reactions, challenges, or expert debates]
+
+WHAT IS STILL UNKNOWN?
+[Unanswered questions, key risks, upcoming deadlines, or milestones to watch]
+
+KEY TAKEAWAYS
+• [Takeaway point 1]
+• [Takeaway point 2]
+• [Takeaway point 3]
+• [Takeaway point 4]
+
+${commonContext}
+
+Respond ONLY with the formatted text above. Do not include markdown code blocks or additional chatter.`;
+  }
+
+  /**
+   * Generates a high-quality deterministic offline fallback explanation
+   * structured precisely according to the mode requirements.
+   */
+  public generateOfflineExplanation(article: Article, mode: ExplanationStyle): string {
+    const title = article.title;
+    const cat = article.category;
+    const desc = article.whatHappened || article.description || article.headline;
+    const source = article.sourceName || 'News agencies';
+    const cleanDesc = desc.replace(/\s+/g, ' ').trim();
+
+    if (mode === 'simple') {
+      const analogy = cat === 'Science & Technology' || cat === 'Space'
+        ? 'Think of this like upgrading an engine in a car so everything runs faster and more reliably.'
+        : cat === 'Business & Economy'
+        ? 'Think of this like budgeting for a household so you have savings for important goals.'
+        : 'Think of this like setting clear rules for a school team so everyone knows what to expect.';
+
+      return `WHAT HAPPENED?
+${cleanDesc} This major event was reported by ${source}. ${analogy}
+
+WHO IS INVOLVED?
+Key leaders, organizations, and experts in ${cat} are leading this initiative, working together with local and national teams.
+
+WHY DOES IT MATTER?
+Decisions like this shape how people live, work, and stay connected. It ensures services and technology continue to improve for the public.
+
+IN ONE LINE
+${title} — a significant step forward in ${cat} with lasting practical benefits.`;
+    }
+
+    if (mode === 'student') {
+      return `WHAT HAPPENED?
+${title}: ${cleanDesc} Reported through ${source}, this event represents a noteworthy development in ${cat}.
+
+THE BACKGROUND
+Understanding this development requires looking at how ${cat} initiatives intersect with modern education, industry standards, and global policy. In recent years, growing demand and evolving technologies have created a need for structured solutions.
+
+KEY TERMS
+• ${cat} — The academic and practical field focusing on research, governance, and advancements in this domain.
+• Strategic Initiative — A coordinated plan designed to achieve specific long-term goals and improvements.
+• Implementation Milestone — A measurable stage of progress verifying that technical or legal objectives are met.
+• Public Impact — The tangible effect a development has on communities, students, and professionals.
+
+WHY IT MATTERS
+For students of ${cat}, economics, and civics, this news connects textbook theory to real-world execution. It highlights how professionals solve complex logistical, policy, and scientific challenges.
+
+STUDENT TAKEAWAY
+Major breakthroughs and policy shifts require collaboration across engineering, governance, and public administration.
+
+THINK ABOUT IT
+How might developments like "${title}" alter the skills and career opportunities students should prepare for over the next decade?`;
+    }
+
+    // Detailed Mode
+    const stakeholders = article.stakeholders && article.stakeholders.length > 0
+      ? article.stakeholders.map(s => `• ${s.name}: ${s.role} (${s.relation})`).join('\n')
+      : `• Primary Publishers & Authorities: ${source}\n• Sector Regulators: Governing bodies overseeing ${cat}\n• Affected Public & Industry: Citizens and enterprises impacted by the decision`;
+
+    const timeline = article.timeline && article.timeline.length > 0
+      ? article.timeline.map(t => `• ${t.date}: ${t.title} - ${t.description}`).join('\n')
+      : `• Preceding Phase: Initial policy formulation and feasibility reviews\n• Current Announcement: Formal reporting and implementation directives\n• Subsequent Horizon: Phased deployment and operational review`;
+
+    return `OVERVIEW
+${title} represents an important milestone in ${cat}. Documented by ${source}, the development addresses longstanding operational and strategic needs.
+
+WHAT HAPPENED?
+${cleanDesc} Official announcements detail procedural steps, resource allocations, and operational timelines intended to execute this strategy.
+
+BACKGROUND
+Over the past decade, shifts in global trade, technology standards, and regulatory frameworks have created pressing challenges for stakeholders. Addressing these pressures requires institutional coordination and dedicated investments.
+
+KEY PLAYERS / STAKEHOLDERS
+${stakeholders}
+
+HOW IT WORKS / WHY IT HAPPENED
+The core mechanism involves structured deployment of administrative and operational resources. By aligning institutional mandates with practical requirements, organizers aim to minimize bottlenecks and ensure compliance with established standards.
+
+TIMELINE
+${timeline}
+
+IMPACT
+• Economic & Technological: Drives productivity and promotes modernization within ${cat}.
+• Policy & Governance: Establishes a precedent for regulatory oversight and accountability.
+• Societal: Broadens public access and stabilizes critical infrastructure.
+
+DIFFERENT VIEWS
+While proponents highlight improved reliability, strategic self-reliance, and modernization, independent analysts point out the necessity of consistent oversight, resource availability, and rigorous timeline adherence.
+
+WHAT IS STILL UNKNOWN?
+Key metrics such as final budgetary allocations, long-term efficiency benchmarks, and execution deadlines will unfold as phased milestones are completed.
+
+KEY TAKEAWAYS
+• ${title} addresses a critical need in ${cat}.
+• Backed by ${source}, implementation relies on cross-sector coordination.
+• Long-term success depends on transparent governance, milestone tracking, and sustained investment.`;
+  }
+
+  /**
+   * Retrieves or on-demand generates an explanation for an article in a specific mode.
+   * Handles caching, Gemini API call, error simulation, and offline fallback.
+   */
+  public async getArticleExplanation(
+    articleId: string,
+    mode: ExplanationStyle,
+    force = false,
+    simulateError = false
+  ): Promise<{ explanation: string; cached: boolean; error?: string }> {
+    const cacheKey = `${articleId}:${mode}`;
+
+    // Handle intentional error simulation for UI testing
+    if (simulateError) {
+      const offline = this.getArticleSync(articleId)
+        ? this.generateOfflineExplanation(this.getArticleSync(articleId)!, mode)
+        : 'Explanation temporarily unavailable. Please retry.';
+      return {
+        explanation: offline,
+        cached: false,
+        error: 'Simulated network timeout during explanation generation. Showing offline summary.'
+      };
+    }
+
+    // Check memory / disk cache if not forced
+    if (!force && this.explanationCache.has(cacheKey)) {
+      const cached = this.explanationCache.get(cacheKey)!;
+      return {
+        explanation: cached.explanation,
+        cached: true
+      };
+    }
+
+    // Find article
+    const article = await this.getArticleById(articleId);
+    if (!article) {
+      throw new Error(`Article ${articleId} not found`);
+    }
+
+    // Check if article already has pre-cached seed/enriched explanation for this mode
+    if (!force && article.explanationModes && article.explanationModes[mode]) {
+      const existing = article.explanationModes[mode];
+      const isIdentical =
+        (mode === 'simple' && existing === article.explanationModes.student) ||
+        (mode === 'student' && existing === article.explanationModes.detailed);
+      if (!isIdentical && existing.length > 200) {
+        this.explanationCache.set(cacheKey, {
+          explanation: existing,
+          createdAt: Date.now()
+        });
+        this.saveExplanationCache();
+        return {
+          explanation: existing,
+          cached: true
+        };
+      }
+    }
+
+    // Attempt Gemini call
+    const ai = getGeminiClient();
+    if (ai) {
+      try {
+        const prompt = this.buildExplanationPrompt(article, mode);
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: prompt
+        });
+
+        const text = response.text ? response.text.trim() : '';
+        if (text && text.length > 50) {
+          // Cache in memory and disk
+          this.explanationCache.set(cacheKey, {
+            explanation: text,
+            createdAt: Date.now()
+          });
+          this.saveExplanationCache();
+
+          // Also update the article's own explanationModes object
+          if (!article.explanationModes) {
+            article.explanationModes = { simple: '', student: '', detailed: '' };
+          }
+          article.explanationModes[mode] = text;
+          this.saveCache();
+
+          return {
+            explanation: text,
+            cached: false
+          };
+        }
+      } catch (geminiError: any) {
+        console.warn(`[NewsService] Gemini explanation generation failed for ${articleId} (${mode}):`, geminiError.message || geminiError);
+      }
+    }
+
+    // Fallback: Generate structured offline explanation
+    const offlineExplanation = this.generateOfflineExplanation(article, mode);
+    this.explanationCache.set(cacheKey, {
+      explanation: offlineExplanation,
+      createdAt: Date.now()
+    });
+    this.saveExplanationCache();
+
+    if (!article.explanationModes) {
+      article.explanationModes = { simple: '', student: '', detailed: '' };
+    }
+    article.explanationModes[mode] = offlineExplanation;
+    this.saveCache();
+
+    return {
+      explanation: offlineExplanation,
+      cached: false,
+      error: !ai ? 'AI service offline: Generated verified offline explanation.' : undefined
+    };
   }
 
   /**
@@ -510,9 +1125,9 @@ class RealNewsService {
       whatHappened: cleanDesc,
       inSimpleWords: `In simple terms: ${cleanDesc}`,
       explanationModes: {
-        simple: cleanDesc,
-        student: cleanDesc,
-        detailed: `${cleanDesc} Reported by ${raw.source?.name || 'news publishers'}.`
+        simple: this.generateOfflineExplanation({ title, category, description: cleanDesc, sourceName } as Article, 'simple'),
+        student: this.generateOfflineExplanation({ title, category, description: cleanDesc, sourceName } as Article, 'student'),
+        detailed: this.generateOfflineExplanation({ title, category, description: cleanDesc, sourceName } as Article, 'detailed')
       },
       whyShouldICare: [
         {
@@ -792,7 +1407,7 @@ Create an engaging, factual educational breakdown. Output ONLY a valid JSON obje
 }`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: prompt,
         config: {
           tools: [{ googleSearch: {} }]

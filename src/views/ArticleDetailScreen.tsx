@@ -18,8 +18,9 @@ import {
   Scale,
   Brain
 } from 'lucide-react';
-import { Article, ExplanationStyle, KeyTerm, Stakeholder } from '../types';
+import { Article, KeyTerm, Stakeholder } from '../types';
 import { useApp } from '../context/AppContext';
+import { ExplanationCard } from '../components/ExplanationCard';
 
 interface ArticleDetailScreenProps {
   article: Article;
@@ -37,7 +38,6 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({ articl
   } = useApp();
 
   const saved = isArticleSaved(article.id);
-  const [explanationMode, setExplanationMode] = useState<ExplanationStyle>('student');
   const [selectedTerm, setSelectedTerm] = useState<KeyTerm | null>(article.keyTerms?.[0] || null);
   const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(article.stakeholders?.[0] || null);
   const [revealSensitive, setRevealSensitive] = useState<boolean>(!article.isSensitive);
@@ -172,41 +172,12 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({ articl
       </section>
 
       {/* SECTION 2: UNDERSTAND THIS (EXPLANATION MODES) */}
-      <section className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-100 dark:border-indigo-900/60 space-y-3 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
-            <Brain className="w-4 h-4 text-indigo-500" />
-            <span>Understand This</span>
-          </div>
-
-          {/* Mode Switcher Tabs */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 self-start sm:self-auto">
-            {(['simple', 'student', 'detailed'] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => setExplanationMode(mode)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all capitalize ${
-                  explanationMode === mode
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-                }`}
-              >
-                {mode === 'simple' ? '🐣 Simple' : mode === 'student' ? '🎓 Student' : '🔬 Detailed'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-indigo-100/80 dark:border-slate-700/80">
-          <p className="text-sm sm:text-base text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
-            {article.explanationModes[explanationMode]}
-          </p>
-        </div>
-
-        <p className="text-[11px] text-slate-400">
-          * Factually grounded explanation calibrated for {explanationMode} reading level.
-        </p>
-      </section>
+      <ExplanationCard
+        articleId={article.id}
+        articleTitle={article.title}
+        category={article.category}
+        initialModes={article.explanationModes}
+      />
 
       {/* SECTION 3: WHY SHOULD I CARE? */}
       <section className="space-y-3">

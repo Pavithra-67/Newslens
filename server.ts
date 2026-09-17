@@ -5,7 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { MOCK_ARTICLES } from './src/data/mockArticles';
 import { MOCK_DAILY_CHALLENGE, MOCK_WEEKLY_CHALLENGE } from './src/data/mockQuizzes';
 import { MOCK_TOPICS } from './src/data/mockTopics';
-import { Article, NewsCategory } from './src/types';
+import { Article, NewsCategory, ExplanationStyle } from './src/types';
 import { db, getLocalDateString, getWeeklyCycleInfo, getLevelInfo, DbUser, verifyPassword } from './server/db';
 import { getGeminiClient } from './server/gemini';
 import { newsService } from './server/newsService';
@@ -13,7 +13,7 @@ import { newsService } from './server/newsService';
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = 3000;
 
 app.use(express.json());
 
@@ -282,6 +282,33 @@ app.get('/api/news/:id', async (req: Request, res: Response) => {
   }
 
   res.json({ article });
+});
+
+// GET /api/news/:id/explanation - get or generate mode-specific explanation (Simple, Student, Detailed)
+app.get('/api/news/:id/explanation', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const mode = (req.query.mode as ExplanationStyle) || 'simple';
+  const force = req.query.force === 'true';
+  const simulateError = req.query.simulateError === 'true';
+
+  if (!['simple', 'student', 'detailed'].includes(mode)) {
+    res.status(400).json({ error: 'Invalid explanation mode. Must be simple, student, or detailed.' });
+    return;
+  }
+
+  try {
+    const result = await newsService.getArticleExplanation(id, mode, force, simulateError);
+    res.json({
+      articleId: id,
+      mode,
+      explanation: result.explanation,
+      cached: result.cached,
+      error: result.error
+    });
+  } catch (err: any) {
+    console.error(`Error fetching explanation for ${id} (${mode}):`, err);
+    res.status(404).json({ error: err.message || 'Article not found or explanation generation failed' });
+  }
 });
 
 // POST /api/news/:id/enrich - on-demand Gemini deep enrichment
