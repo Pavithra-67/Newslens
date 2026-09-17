@@ -291,12 +291,12 @@ export const AuthModal: React.FC = () => {
               type="button"
               onClick={() => {
                 setMode('login');
-                setEmail('pavi.sankari26@gmail.com');
+                setEmail('pavi.elangumaran3@gmail.com');
                 setPassword('password123');
               }}
               className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] cursor-pointer"
             >
-              Demo Student: pavi.sankari26@gmail.com
+              Demo Student: pavi.elangumaran3@gmail.com
             </button>
           </div>
         </div>

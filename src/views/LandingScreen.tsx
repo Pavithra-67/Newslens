@@ -610,13 +610,13 @@ export const LandingScreen: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('pavi.sankari26@gmail.com');
+                  setEmail('pavi.elangumaran3@gmail.com');
                   setPassword('password123');
                 }}
                 className="w-full text-left p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-indigo-600 dark:text-indigo-300 font-mono text-[11px] transition-colors cursor-pointer"
                 id="login-quick-demo-btn"
               >
-                Click to load demo: pavi.sankari26@gmail.com
+                Click to load demo: pavi.elangumaran3@gmail.com
               </button>
             </div>
           </div>

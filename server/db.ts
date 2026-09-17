@@ -280,13 +280,13 @@ class NewsLensDatabase {
   }
 
   private seedDefaultUserIfEmpty() {
-    if (this.data.users.length === 0 || !this.findUserByEmail('pavi.sankari26@gmail.com')) {
+    if (this.data.users.length === 0 || !this.findUserByEmail('pavi.elangumaran3@gmail.com')) {
       const paviSalt = generateSalt();
       const paviPasswordHash = hashPassword('password123', paviSalt);
       const paviUser: DbUser = {
         id: 'usr_pavi_default',
         name: 'Pavithra Sankari',
-        email: 'pavi.sankari26@gmail.com',
+        email: 'pavi.elangumaran3@gmail.com',
         passwordHash: paviPasswordHash,
         salt: paviSalt,
         role: 'student',
@@ -322,7 +322,7 @@ class NewsLensDatabase {
         createdAt: new Date().toISOString()
       };
 
-      if (!this.findUserByEmail('pavi.sankari26@gmail.com')) {
+      if (!this.findUserByEmail('pavi.elangumaran3@gmail.com')) {
         this.data.users.push(paviUser);
       }
     }

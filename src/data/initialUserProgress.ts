@@ -66,7 +66,7 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
 export const INITIAL_USER_PROFILE: UserProfile = {
   id: 'usr-student-01',
   name: 'Pavithra Sankari',
-  email: 'pavi.sankari26@gmail.com',
+  email: 'pavi.elangumaran3@gmail.com',
   avatar: '',
   role: 'student',
   createdAt: '2026-09-01T00:00:00Z'
