@@ -7,6 +7,7 @@ import { MOCK_DAILY_CHALLENGE, MOCK_WEEKLY_CHALLENGE } from './src/data/mockQuiz
 import { MOCK_TOPICS } from './src/data/mockTopics';
 import { Article, NewsCategory, ExplanationStyle } from './src/types';
 import { db, getLocalDateString, getWeeklyCycleInfo, getLevelInfo, DbUser, verifyPassword } from './server/db';
+import { formatDatabaseError } from './server/mongodb';
 import { getGeminiClient } from './server/gemini';
 import { newsService } from './server/newsService';
 
@@ -18,13 +19,18 @@ const PORT = 3000;
 app.use(express.json());
 
 // Helper to extract authenticated user
-function getAuthUser(req: Request): DbUser | null {
+async function getAuthUser(req: Request): Promise<DbUser | null> {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
   const token = authHeader.substring(7).trim();
-  return db.getUserBySessionToken(token);
+  try {
+    return await db.getUserBySessionToken(token);
+  } catch (err: any) {
+    console.error('[Auth] Error getting user by session token:', err?.message || err);
+    return null;
+  }
 }
 
 // ----------------------------------------------------
@@ -32,7 +38,7 @@ function getAuthUser(req: Request): DbUser | null {
 // ----------------------------------------------------
 
 // POST /api/auth/signup and /api/auth/register - Create a new user account
-app.post(['/api/auth/signup', '/api/auth/register'], (req: Request, res: Response) => {
+app.post(['/api/auth/signup', '/api/auth/register'], async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -51,13 +57,13 @@ app.post(['/api/auth/signup', '/api/auth/register'], (req: Request, res: Respons
   }
 
   try {
-    const user = db.createUser({
+    const user = await db.createUser({
       name: name.trim(),
       email: email.trim(),
       password
     });
 
-    const token = db.createSession(user.id);
+    const token = await db.createSession(user.id);
     const { level, levelTitle } = getLevelInfo(user.xp);
 
     res.status(201).json({
@@ -89,12 +95,13 @@ app.post(['/api/auth/signup', '/api/auth/register'], (req: Request, res: Respons
       }
     });
   } catch (err: any) {
-    res.status(400).json({ error: err.message || 'Signup failed' });
+    const isValidationError = err?.message?.includes('already exists') || err?.message?.includes('required');
+    res.status(isValidationError ? 400 : 503).json({ error: formatDatabaseError(err) });
   }
 });
 
 // POST /api/auth/login - Log in with existing account
-app.post('/api/auth/login', (req: Request, res: Response) => {
+app.post('/api/auth/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -102,63 +109,70 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
     return;
   }
 
-  const user = db.findUserByEmail(email);
-  if (!user) {
-    res.status(401).json({ error: 'Invalid email or password.' });
-    return;
-  }
-
-  if (!verifyPassword(password, user.salt, user.passwordHash)) {
-    res.status(401).json({ error: 'Invalid email or password.' });
-    return;
-  }
-
-  const token = db.createSession(user.id);
-  const { level, levelTitle } = getLevelInfo(user.xp);
-
-  res.json({
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      createdAt: user.createdAt
-    },
-    token,
-    progress: {
-      level,
-      levelTitle,
-      xp: user.xp,
-      xpToNextLevel: 200 - (user.xp % 200),
-      streakDays: user.streakDays,
-      longestStreak: user.longestStreak,
-      lastActiveDate: user.lastCompletedDate || new Date().toISOString().split('T')[0],
-      storiesReadCount: user.storiesReadCount,
-      savedArticleIds: user.savedArticleIds,
-      interests: user.interests,
-      explanationStyle: user.explanationStyle,
-      quizStats: user.quizStats,
-      predictionStats: user.predictionStats,
-      achievements: user.achievements,
-      readHistory: user.readHistory
+  try {
+    const user = await db.findUserByEmail(email);
+    if (!user) {
+      res.status(401).json({ error: 'Invalid email or password.' });
+      return;
     }
-  });
+
+    if (!verifyPassword(password, user.salt, user.passwordHash)) {
+      res.status(401).json({ error: 'Invalid email or password.' });
+      return;
+    }
+
+    const token = await db.createSession(user.id);
+    const { level, levelTitle } = getLevelInfo(user.xp);
+
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        createdAt: user.createdAt
+      },
+      token,
+      progress: {
+        level,
+        levelTitle,
+        xp: user.xp,
+        xpToNextLevel: 200 - (user.xp % 200),
+        streakDays: user.streakDays,
+        longestStreak: user.longestStreak,
+        lastActiveDate: user.lastCompletedDate || new Date().toISOString().split('T')[0],
+        storiesReadCount: user.storiesReadCount,
+        savedArticleIds: user.savedArticleIds,
+        interests: user.interests,
+        explanationStyle: user.explanationStyle,
+        quizStats: user.quizStats,
+        predictionStats: user.predictionStats,
+        achievements: user.achievements,
+        readHistory: user.readHistory
+      }
+    });
+  } catch (err: any) {
+    console.error('[Login error]', err?.message || err);
+    res.status(503).json({ error: formatDatabaseError(err) });
+  }
 });
 
 // POST /api/auth/logout - Sign out and invalidate session
-app.post('/api/auth/logout', (req: Request, res: Response) => {
+app.post('/api/auth/logout', async (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
-    db.deleteSession(token);
+    try {
+      await db.deleteSession(token);
+    } catch (err) {}
   }
   res.json({ success: true });
 });
 
 // GET /api/auth/me - Validate current session and retrieve profile
-app.get('/api/auth/me', (req: Request, res: Response) => {
-  const user = getAuthUser(req);
+app.get('/api/auth/me', async (req: Request, res: Response) => {
+  const user = await getAuthUser(req);
   if (!user) {
     res.status(401).json({ error: 'Unauthorized or session expired' });
     return;
@@ -263,17 +277,18 @@ app.get('/api/news/:id', async (req: Request, res: Response) => {
   }
 
   // Record reading in user progress if authenticated
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (user) {
-    const existingRead = user.readHistory.find(h => h.articleId === article.id);
+    const existingRead = (user.readHistory || []).find(h => h.articleId === article.id);
     if (!existingRead) {
+      user.readHistory = user.readHistory || [];
       user.readHistory.unshift({
         articleId: article.id,
         timestamp: new Date().toISOString()
       });
       user.storiesReadCount += 1;
       user.xp += 5; // +5 XP for reading a new story
-      db.updateUser(user.id, {
+      await db.updateUser(user.id, {
         readHistory: user.readHistory,
         storiesReadCount: user.storiesReadCount,
         xp: user.xp
@@ -363,14 +378,14 @@ app.get('/api/quiz/daily', (req: Request, res: Response) => {
 });
 
 // GET /api/quiz/weekly - weekly challenge for the current 7-day cycle
-app.get('/api/quiz/weekly', (req: Request, res: Response) => {
+app.get('/api/quiz/weekly', async (req: Request, res: Response) => {
   const tz = (req.query.tz as string) || undefined;
   const cycleInfo = getWeeklyCycleInfo(new Date(), tz);
   const challenge = newsService.getWeeklyPracticeChallenge(cycleInfo);
 
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (user) {
-    const completion = db.getWeeklyCompletion(user.id, cycleInfo.cycleId);
+    const completion = await db.getWeeklyCompletion(user.id, cycleInfo.cycleId);
     res.json({
       challenge: {
         ...challenge,
@@ -393,10 +408,10 @@ app.get('/api/quiz/weekly', (req: Request, res: Response) => {
 });
 
 // GET /api/quiz/weekly-status - Check 7-day cycle completion status and history
-app.get('/api/quiz/weekly-status', (req: Request, res: Response) => {
+app.get('/api/quiz/weekly-status', async (req: Request, res: Response) => {
   const tz = (req.query.tz as string) || undefined;
   const cycleInfo = getWeeklyCycleInfo(new Date(), tz);
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
 
   if (!user) {
     res.json({
@@ -412,7 +427,7 @@ app.get('/api/quiz/weekly-status', (req: Request, res: Response) => {
     return;
   }
 
-  const status = db.getWeeklyStatus(user.id, tz);
+  const status = await db.getWeeklyStatus(user.id, tz);
   res.json({
     ...status,
     authenticated: true
@@ -420,8 +435,8 @@ app.get('/api/quiz/weekly-status', (req: Request, res: Response) => {
 });
 
 // POST /api/quiz/submit-weekly - Server-authoritative weekly quiz submission & 7-day cycle lock
-app.post('/api/quiz/submit-weekly', (req: Request, res: Response) => {
-  const user = getAuthUser(req);
+app.post('/api/quiz/submit-weekly', async (req: Request, res: Response) => {
+  const user = await getAuthUser(req);
   if (!user) {
     res.status(401).json({ error: 'You must be signed in to submit your Weekly Practice.' });
     return;
@@ -437,7 +452,7 @@ app.post('/api/quiz/submit-weekly', (req: Request, res: Response) => {
   const targetCycleId = cycleId || cycleInfo.cycleId;
 
   // Server-authoritative check: Has user completed this 7-day cycle?
-  const existing = db.getWeeklyCompletion(user.id, targetCycleId);
+  const existing = await db.getWeeklyCompletion(user.id, targetCycleId);
   if (existing) {
     res.status(409).json({
       success: false,
@@ -469,7 +484,7 @@ app.post('/api/quiz/submit-weekly', (req: Request, res: Response) => {
   const xpEarned = (score * 25) + ((questions.length - score) * 10);
 
   try {
-    const { completion, user: updatedUser } = db.recordWeeklyCompletion({
+    const { completion, user: updatedUser } = await db.recordWeeklyCompletion({
       userId: user.id,
       cycleId: targetCycleId,
       score,
@@ -502,8 +517,8 @@ app.post('/api/quiz/submit-weekly', (req: Request, res: Response) => {
 });
 
 // GET /api/quiz/daily-status - Server-side check for today's quiz completion
-app.get('/api/quiz/daily-status', (req: Request, res: Response) => {
-  const user = getAuthUser(req);
+app.get('/api/quiz/daily-status', async (req: Request, res: Response) => {
+  const user = await getAuthUser(req);
   const tz = (req.query.tz as string) || undefined;
   const todayDate = getLocalDateString(new Date(), tz);
 
@@ -519,8 +534,8 @@ app.get('/api/quiz/daily-status', (req: Request, res: Response) => {
     return;
   }
 
-  const streakInfo = db.getUserStreakInfo(user.id, todayDate);
-  const completion = db.getDailyCompletion(user.id, todayDate);
+  const streakInfo = await db.getUserStreakInfo(user.id, todayDate);
+  const completion = await db.getDailyCompletion(user.id, todayDate);
 
   res.json({
     quizDate: todayDate,
@@ -544,8 +559,8 @@ app.get('/api/quiz/daily-status', (req: Request, res: Response) => {
 });
 
 // POST /api/quiz/submit-daily - Server-authoritative daily quiz submission & streak/XP verification
-app.post('/api/quiz/submit-daily', (req: Request, res: Response) => {
-  const user = getAuthUser(req);
+app.post('/api/quiz/submit-daily', async (req: Request, res: Response) => {
+  const user = await getAuthUser(req);
   if (!user) {
     res.status(401).json({ error: 'You must be signed in to submit the daily quiz.' });
     return;
@@ -560,7 +575,7 @@ app.post('/api/quiz/submit-daily', (req: Request, res: Response) => {
   const todayDate = getLocalDateString(new Date(), tz);
 
   // Server check: Has the user already completed today's quiz?
-  const existingCompletion = db.getDailyCompletion(user.id, todayDate);
+  const existingCompletion = await db.getDailyCompletion(user.id, todayDate);
   if (existingCompletion) {
     res.status(409).json({
       success: false,
@@ -591,7 +606,7 @@ app.post('/api/quiz/submit-daily', (req: Request, res: Response) => {
   const xpEarned = (score * 20) + ((dailyQuestions.length - score) * 5);
 
   try {
-    const { completion, user: updatedUser } = db.recordDailyQuizCompletion({
+    const { completion, user: updatedUser } = await db.recordDailyQuizCompletion({
       userId: user.id,
       quizId: MOCK_DAILY_CHALLENGE.id,
       quizDate: todayDate,
@@ -623,7 +638,7 @@ app.post('/api/quiz/submit-daily', (req: Request, res: Response) => {
 });
 
 // POST /api/quiz/submit-answer - single practice question scoring
-app.post('/api/quiz/submit-answer', (req: Request, res: Response) => {
+app.post('/api/quiz/submit-answer', async (req: Request, res: Response) => {
   const { questionId, selectedIndex, category } = req.body;
 
   const allQuestions = [
@@ -640,7 +655,7 @@ app.post('/api/quiz/submit-answer', (req: Request, res: Response) => {
   const isCorrect = question.correctIndex === selectedIndex;
   const xpEarned = isCorrect ? 20 : 5;
 
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (user) {
     user.xp += xpEarned;
     user.quizStats.attempted += 1;
@@ -653,7 +668,7 @@ app.post('/api/quiz/submit-answer', (req: Request, res: Response) => {
     user.quizStats.byCategory[cat].attempted += 1;
     if (isCorrect) user.quizStats.byCategory[cat].correct += 1;
 
-    db.updateUser(user.id, {
+    await db.updateUser(user.id, {
       xp: user.xp,
       quizStats: user.quizStats
     });
@@ -681,9 +696,9 @@ app.post('/api/quiz/submit-answer', (req: Request, res: Response) => {
 });
 
 // POST /api/predictions/vote - record forecast
-app.post('/api/predictions/vote', (req: Request, res: Response) => {
+app.post('/api/predictions/vote', async (req: Request, res: Response) => {
   const { predictionId, optionIndex } = req.body;
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
 
   const allArticles = newsService.getArticles();
   for (const article of allArticles) {
@@ -702,7 +717,7 @@ app.post('/api/predictions/vote', (req: Request, res: Response) => {
 
         if (user) {
           user.predictionStats.total += 1;
-          db.updateUser(user.id, {
+          await db.updateUser(user.id, {
             predictionStats: user.predictionStats
           });
         }
@@ -723,8 +738,8 @@ app.post('/api/predictions/vote', (req: Request, res: Response) => {
 });
 
 // GET /api/user/profile - get complete user profile and actual DB stats
-app.get('/api/user/profile', (req: Request, res: Response) => {
-  const user = getAuthUser(req);
+app.get('/api/user/profile', async (req: Request, res: Response) => {
+  const user = await getAuthUser(req);
   if (!user) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
@@ -732,7 +747,7 @@ app.get('/api/user/profile', (req: Request, res: Response) => {
 
   const tz = (req.query.tz as string) || undefined;
   const todayDate = getLocalDateString(new Date(), tz);
-  const streakInfo = db.getUserStreakInfo(user.id, todayDate);
+  const streakInfo = await db.getUserStreakInfo(user.id, todayDate);
   const { level, levelTitle } = getLevelInfo(user.xp);
 
   res.json({
@@ -765,14 +780,14 @@ app.get('/api/user/profile', (req: Request, res: Response) => {
 });
 
 // POST /api/user/save-article - toggle bookmark in database
-app.post('/api/user/save-article', (req: Request, res: Response) => {
+app.post('/api/user/save-article', async (req: Request, res: Response) => {
   const { articleId } = req.body;
   if (!articleId) {
     res.status(400).json({ error: 'articleId required' });
     return;
   }
 
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
   if (!user) {
     res.status(401).json({ error: 'Sign in to save articles.' });
     return;
@@ -788,7 +803,7 @@ app.post('/api/user/save-article', (req: Request, res: Response) => {
     saved = true;
   }
 
-  db.updateUser(user.id, { savedArticleIds: user.savedArticleIds });
+  await db.updateUser(user.id, { savedArticleIds: user.savedArticleIds });
 
   res.json({
     saved,
@@ -797,16 +812,16 @@ app.post('/api/user/save-article', (req: Request, res: Response) => {
 });
 
 // POST /api/user/onboarding - save preferences
-app.post('/api/user/onboarding', (req: Request, res: Response) => {
+app.post('/api/user/onboarding', async (req: Request, res: Response) => {
   const { interests, explanationStyle } = req.body;
-  const user = getAuthUser(req);
+  const user = await getAuthUser(req);
 
   if (user) {
     if (Array.isArray(interests)) user.interests = interests;
     if (explanationStyle && ['simple', 'student', 'detailed'].includes(explanationStyle)) {
       user.explanationStyle = explanationStyle;
     }
-    db.updateUser(user.id, {
+    await db.updateUser(user.id, {
       interests: user.interests,
       explanationStyle: user.explanationStyle
     });
@@ -856,6 +871,21 @@ async function startServer() {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`NewsLens server running on http://0.0.0.0:${PORT}`);
   });
+
+  // Check and initialize MongoDB Atlas connection
+  if (process.env.MONGODB_URI) {
+    db.init()
+      .then(() => {
+        console.log('[MongoDB] Connected to database: newslens');
+      })
+      .catch((err: any) => {
+        console.error('[MongoDB] Connection error:', err?.message || err);
+      });
+  } else {
+    console.warn(
+      '[MongoDB] ⚠️ WARNING: MONGODB_URI is not set. Database persistence requires MONGODB_URI in your server environment.'
+    );
+  }
 }
 
 startServer();

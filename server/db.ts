@@ -1,11 +1,8 @@
-import fs from 'fs';
-import path from 'path';
 import crypto from 'crypto';
-import { Article, DailyChallenge, NewsCategory, TopicInfo, UserProgress, WeeklyChallenge, QuizQuestion } from '../src/types';
-import { MOCK_ARTICLES } from '../src/data/mockArticles';
-import { MOCK_DAILY_CHALLENGE, MOCK_WEEKLY_CHALLENGE } from '../src/data/mockQuizzes';
-import { MOCK_TOPICS } from '../src/data/mockTopics';
+import { Db, Collection } from 'mongodb';
+import { NewsCategory, QuizQuestion } from '../src/types';
 import { INITIAL_USER_PROGRESS } from '../src/data/initialUserProgress';
+import { getDatabase, getCollection, ensureIndexes } from './mongodb';
 
 export interface DbUser {
   id: string;
@@ -77,25 +74,6 @@ export interface WeeklyCycleInfo {
   endDateStr: string;
   nextCycleDateStr: string;
   daysRemaining: number;
-}
-
-interface DatabaseSchema {
-  users: DbUser[];
-  sessions: DbSession[];
-  dailyCompletions: DbDailyCompletion[];
-  weeklyCompletions: DbWeeklyCompletion[];
-}
-
-const DB_FILE_PATH = path.join(process.cwd(), 'data', 'newslens_db.json');
-
-// Ensure data folder exists
-const dataDir = path.dirname(DB_FILE_PATH);
-if (!fs.existsSync(dataDir)) {
-  try {
-    fs.mkdirSync(dataDir, { recursive: true });
-  } catch (e) {
-    console.error('Failed to create data directory:', e);
-  }
 }
 
 // Password hashing helpers
@@ -239,160 +217,77 @@ export function getWeeklyCycleInfo(date: Date = new Date(), timeZone?: string): 
   };
 }
 
+/**
+ * Strips internal MongoDB _id from returned application documents.
+ */
+function sanitizeDoc<T>(doc: any): T {
+  if (!doc) return doc;
+  const { _id, ...rest } = doc;
+  return rest as T;
+}
+
+/**
+ * MongoDB Atlas persistence service for NewsLens.
+ */
 class NewsLensDatabase {
-  private data: DatabaseSchema = {
-    users: [],
-    sessions: [],
-    dailyCompletions: [],
-    weeklyCompletions: []
-  };
+  private initialized = false;
 
-  constructor() {
-    this.load();
-    this.seedDefaultUserIfEmpty();
+  /**
+   * Initializes the MongoDB connection and ensures collections and indexes exist.
+   */
+  public async init(): Promise<void> {
+    if (this.initialized) return;
+    const db = await getDatabase();
+    await ensureIndexes(db);
+    this.initialized = true;
   }
 
-  private load() {
-    if (fs.existsSync(DB_FILE_PATH)) {
-      try {
-        const raw = fs.readFileSync(DB_FILE_PATH, 'utf-8');
-        this.data = JSON.parse(raw);
-        if (!this.data.weeklyCompletions) {
-          this.data.weeklyCompletions = [];
-        }
-      } catch (err) {
-        console.error('Error loading database file, starting fresh', err);
-        this.data = { users: [], sessions: [], dailyCompletions: [], weeklyCompletions: [] };
-      }
-    } else {
-      this.data = { users: [], sessions: [], dailyCompletions: [], weeklyCompletions: [] };
-    }
+  private async getUsersCol(): Promise<Collection<DbUser>> {
+    await this.init();
+    return getCollection<DbUser>('users');
   }
 
-  private save() {
-    try {
-      const tmpPath = `${DB_FILE_PATH}.tmp`;
-      fs.writeFileSync(tmpPath, JSON.stringify(this.data, null, 2), 'utf-8');
-      fs.renameSync(tmpPath, DB_FILE_PATH);
-    } catch (err) {
-      console.error('Failed to write database file:', err);
-    }
+  private async getSessionsCol(): Promise<Collection<DbSession>> {
+    await this.init();
+    return getCollection<DbSession>('sessions');
   }
 
-  private seedDefaultUserIfEmpty() {
-    if (this.data.users.length === 0 || !this.findUserByEmail('pavi.elangumaran3@gmail.com')) {
-      const paviSalt = generateSalt();
-      const paviPasswordHash = hashPassword('password123', paviSalt);
-      const paviUser: DbUser = {
-        id: 'usr_pavi_default',
-        name: 'Pavithra Sankari',
-        email: 'pavi.elangumaran3@gmail.com',
-        passwordHash: paviPasswordHash,
-        salt: paviSalt,
-        role: 'student',
-        avatar: '',
-        xp: 420,
-        streakDays: 7,
-        longestStreak: 12,
-        lastCompletedDate: null,
-        storiesReadCount: 18,
-        savedArticleIds: ['india-semiconductor-mission', 'spadex-space-docking-isro'],
-        interests: ['Science & Technology', 'Space', 'Business & Economy', 'Education'],
-        explanationStyle: 'student',
-        quizStats: {
-          attempted: 25,
-          correct: 22,
-          byCategory: {
-            'Science & Technology': { attempted: 12, correct: 11 },
-            'Space': { attempted: 8, correct: 7 },
-            'Business & Economy': { attempted: 5, correct: 4 }
-          }
-        },
-        predictionStats: {
-          total: 6,
-          resolved: 4,
-          correct: 3,
-          byCategory: {}
-        },
-        achievements: INITIAL_USER_PROGRESS.achievements,
-        readHistory: [
-          { articleId: 'india-semiconductor-mission', timestamp: new Date(Date.now() - 86400000).toISOString() },
-          { articleId: 'spadex-space-docking-isro', timestamp: new Date(Date.now() - 172800000).toISOString() }
-        ],
-        createdAt: new Date().toISOString()
-      };
-
-      if (!this.findUserByEmail('pavi.elangumaran3@gmail.com')) {
-        this.data.users.push(paviUser);
-      }
-    }
-
-    if (this.data.users.length === 0) {
-      const salt = generateSalt();
-      const passwordHash = hashPassword('student123', salt);
-      const defaultUser: DbUser = {
-        id: 'usr_student_demo',
-        name: 'Aarav Sharma',
-        email: 'student@newslens.edu',
-        passwordHash,
-        salt,
-        role: 'student',
-        avatar: '',
-        xp: 145,
-        streakDays: 3,
-        longestStreak: 5,
-        lastCompletedDate: null,
-        storiesReadCount: 6,
-        savedArticleIds: ['india-semiconductor-mission', 'spadex-space-docking-isro'],
-        interests: ['Science & Technology', 'Space', 'Business & Economy', 'Education'],
-        explanationStyle: 'student',
-        quizStats: {
-          attempted: 15,
-          correct: 12,
-          byCategory: {
-            'Science & Technology': { attempted: 8, correct: 7 },
-            'Space': { attempted: 4, correct: 3 },
-            'Business & Economy': { attempted: 3, correct: 2 }
-          }
-        },
-        predictionStats: {
-          total: 4,
-          resolved: 2,
-          correct: 2,
-          byCategory: {}
-        },
-        achievements: INITIAL_USER_PROGRESS.achievements,
-        readHistory: [
-          { articleId: 'india-semiconductor-mission', timestamp: new Date(Date.now() - 86400000).toISOString() },
-          { articleId: 'spadex-space-docking-isro', timestamp: new Date(Date.now() - 172800000).toISOString() }
-        ],
-        createdAt: new Date().toISOString()
-      };
-
-      this.data.users.push(defaultUser);
-    }
-    this.save();
+  private async getDailyCol(): Promise<Collection<DbDailyCompletion>> {
+    await this.init();
+    return getCollection<DbDailyCompletion>('dailyCompletions');
   }
 
-  // --- User Operations ---
+  private async getWeeklyCol(): Promise<Collection<DbWeeklyCompletion>> {
+    await this.init();
+    return getCollection<DbWeeklyCompletion>('weeklyCompletions');
+  }
 
-  public findUserByEmail(email: string): DbUser | undefined {
+  // ----------------------------------------------------
+  // USER OPERATIONS
+  // ----------------------------------------------------
+
+  public async findUserByEmail(email: string): Promise<DbUser | null> {
     const normalized = email.trim().toLowerCase();
-    return this.data.users.find(u => u.email.toLowerCase() === normalized);
+    const col = await this.getUsersCol();
+    const user = await col.findOne({ email: normalized });
+    return user ? sanitizeDoc<DbUser>(user) : null;
   }
 
-  public findUserById(id: string): DbUser | undefined {
-    return this.data.users.find(u => u.id === id);
+  public async findUserById(id: string): Promise<DbUser | null> {
+    const col = await this.getUsersCol();
+    const user = await col.findOne({ id });
+    return user ? sanitizeDoc<DbUser>(user) : null;
   }
 
-  public createUser(params: {
+  public async createUser(params: {
     name: string;
     email: string;
     password: string;
     role?: 'student' | 'admin';
-  }): DbUser {
+  }): Promise<DbUser> {
     const normalizedEmail = params.email.trim().toLowerCase();
-    if (this.findUserByEmail(normalizedEmail)) {
+    const existing = await this.findUserByEmail(normalizedEmail);
+    if (existing) {
       throw new Error('An account with this email already exists.');
     }
 
@@ -427,83 +322,115 @@ class NewsLensDatabase {
         correct: 0,
         byCategory: {}
       },
-      achievements: INITIAL_USER_PROGRESS.achievements.map(a => ({ ...a, currentProgress: 0, unlockedAt: undefined })),
+      achievements: INITIAL_USER_PROGRESS.achievements.map(a => ({
+        ...a,
+        currentProgress: 0,
+        unlockedAt: undefined
+      })),
       readHistory: [],
       createdAt: new Date().toISOString()
     };
 
-    this.data.users.push(newUser);
-    this.save();
+    const col = await this.getUsersCol();
+    try {
+      await col.insertOne(newUser as any);
+    } catch (err: any) {
+      if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
+        throw new Error('An account with this email already exists.');
+      }
+      throw err;
+    }
+
     return newUser;
   }
 
-  public updateUser(userId: string, updates: Partial<DbUser>): DbUser {
-    const user = this.findUserById(userId);
-    if (!user) throw new Error('User not found');
+  public async updateUser(userId: string, updates: Partial<DbUser>): Promise<DbUser> {
+    const col = await this.getUsersCol();
+    // Exclude internal _id or primary id from being overridden
+    const { _id, id, ...safeUpdates } = updates as any;
 
-    Object.assign(user, updates);
-    this.save();
-    return user;
+    const result = await col.findOneAndUpdate(
+      { id: userId },
+      { $set: safeUpdates },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) {
+      throw new Error('User not found');
+    }
+
+    return sanitizeDoc<DbUser>(result);
   }
 
-  // --- Session Operations ---
+  // ----------------------------------------------------
+  // SESSION OPERATIONS
+  // ----------------------------------------------------
 
-  public createSession(userId: string): string {
+  public async createSession(userId: string): Promise<string> {
     const token = `sess_${crypto.randomBytes(24).toString('hex')}`;
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
 
-    this.data.sessions.push({
+    const session: DbSession = {
       token,
       userId,
       createdAt: new Date().toISOString(),
       expiresAt
-    });
-    this.save();
+    };
+
+    const col = await this.getSessionsCol();
+    await col.insertOne(session as any);
     return token;
   }
 
-  public getUserBySessionToken(token: string): DbUser | null {
+  public async getUserBySessionToken(token: string): Promise<DbUser | null> {
     if (!token) return null;
-    const session = this.data.sessions.find(s => s.token === token);
+    const col = await this.getSessionsCol();
+    const session = await col.findOne({ token });
     if (!session) return null;
 
+    // Check expiration
     if (new Date(session.expiresAt).getTime() < Date.now()) {
-      this.deleteSession(token);
+      await this.deleteSession(token);
       return null;
     }
 
-    const user = this.findUserById(session.userId);
-    return user || null;
+    return this.findUserById(session.userId);
   }
 
-  public deleteSession(token: string) {
-    this.data.sessions = this.data.sessions.filter(s => s.token !== token);
-    this.save();
+  public async deleteSession(token: string): Promise<void> {
+    if (!token) return;
+    const col = await this.getSessionsCol();
+    await col.deleteOne({ token });
   }
 
-  // --- Daily Quiz Operations ---
+  // ----------------------------------------------------
+  // DAILY QUIZ OPERATIONS
+  // ----------------------------------------------------
 
-  public getDailyCompletion(userId: string, quizDate: string): DbDailyCompletion | undefined {
-    return this.data.dailyCompletions.find(
-      c => c.userId === userId && c.quizDate === quizDate
-    );
+  public async getDailyCompletion(userId: string, quizDate: string): Promise<DbDailyCompletion | null> {
+    const col = await this.getDailyCol();
+    const completion = await col.findOne({ userId, quizDate });
+    return completion ? sanitizeDoc<DbDailyCompletion>(completion) : null;
   }
 
-  public getUserStreakInfo(userId: string, todayDateStr: string): {
+  public async getUserStreakInfo(userId: string, todayDateStr: string): Promise<{
     currentStreak: number;
     longestStreak: number;
     lastCompletedDate: string | null;
     completedToday: boolean;
-  } {
-    const user = this.findUserById(userId);
+  }> {
+    const user = await this.findUserById(userId);
     if (!user) {
       return { currentStreak: 0, longestStreak: 0, lastCompletedDate: null, completedToday: false };
     }
 
-    const completions = this.data.dailyCompletions
-      .filter(c => c.userId === userId)
-      .map(c => c.quizDate);
-    const uniqueDates = Array.from(new Set(completions)).sort();
+    const col = await this.getDailyCol();
+    const completions = await col
+      .find({ userId })
+      .project<{ quizDate: string }>({ quizDate: 1 })
+      .toArray();
+
+    const uniqueDates = Array.from(new Set(completions.map(c => c.quizDate))).sort();
 
     if (uniqueDates.length === 0) {
       return {
@@ -566,7 +493,7 @@ class NewsLensDatabase {
     };
   }
 
-  public recordDailyQuizCompletion(params: {
+  public async recordDailyQuizCompletion(params: {
     userId: string;
     quizId: string;
     quizDate: string; // YYYY-MM-DD
@@ -574,17 +501,17 @@ class NewsLensDatabase {
     totalQuestions: number;
     xpEarned: number;
     answers: Record<string, number>;
-  }): {
+  }): Promise<{
     completion: DbDailyCompletion;
     user: DbUser;
-  } {
+  }> {
     const { userId, quizId, quizDate, score, totalQuestions, xpEarned, answers } = params;
 
-    const user = this.findUserById(userId);
+    const user = await this.findUserById(userId);
     if (!user) throw new Error('User not found');
 
     // Strict constraint check: userId + quizDate
-    const existing = this.getDailyCompletion(userId, quizDate);
+    const existing = await this.getDailyCompletion(userId, quizDate);
     if (existing) {
       throw new Error("You've already completed today's quiz.");
     }
@@ -598,7 +525,7 @@ class NewsLensDatabase {
       // Consecutive day
       newStreak = (user.streakDays || 0) + 1;
     } else if (isSameDay(user.lastCompletedDate, quizDate)) {
-      // Same day (should have been caught by existing check, but defense in depth)
+      // Same day defensive check
       newStreak = user.streakDays || 1;
     } else {
       // Missed one or more days -> streak resets to 1
@@ -607,16 +534,32 @@ class NewsLensDatabase {
 
     const newLongestStreak = Math.max(user.longestStreak || 0, newStreak);
 
-    // Update user stats
-    user.xp += xpEarned;
-    user.streakDays = newStreak;
-    user.longestStreak = newLongestStreak;
-    user.lastCompletedDate = quizDate;
-    user.quizStats.attempted += totalQuestions;
-    user.quizStats.correct += score;
+    // Create completion record
+    const completion: DbDailyCompletion = {
+      id: `comp_${crypto.randomBytes(8).toString('hex')}`,
+      userId,
+      quizId,
+      quizDate,
+      score,
+      totalQuestions,
+      xpAwarded: xpEarned,
+      answers,
+      completedAt: new Date().toISOString()
+    };
 
-    // Check streak achievements
-    user.achievements = user.achievements.map(ach => {
+    // Atomic insert into dailyCompletions collection with unique compound index
+    const dailyCol = await this.getDailyCol();
+    try {
+      await dailyCol.insertOne(completion as any);
+    } catch (err: any) {
+      if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
+        throw new Error("You've already completed today's quiz.");
+      }
+      throw err;
+    }
+
+    // Update streak achievements
+    const updatedAchievements = (user.achievements || []).map(ach => {
       if (ach.id === 'streak-7') {
         const prog = Math.min(ach.maxProgress, newStreak);
         return {
@@ -635,39 +578,52 @@ class NewsLensDatabase {
       return ach;
     });
 
-    // Create completion record
-    const completion: DbDailyCompletion = {
-      id: `comp_${crypto.randomBytes(8).toString('hex')}`,
-      userId,
-      quizId,
-      quizDate,
-      score,
-      totalQuestions,
-      xpAwarded: xpEarned,
-      answers,
-      completedAt: new Date().toISOString()
-    };
-
-    this.data.dailyCompletions.push(completion);
-    this.save();
-
-    return { completion, user };
-  }
-
-  // --- Weekly Practice Operations ---
-
-  public getWeeklyCompletion(userId: string, cycleId: string): DbWeeklyCompletion | undefined {
-    return this.data.weeklyCompletions.find(
-      c => c.userId === userId && c.cycleId === cycleId
+    // Update user stats in MongoDB atomically
+    const usersCol = await this.getUsersCol();
+    const updatedUserDoc = await usersCol.findOneAndUpdate(
+      { id: userId },
+      {
+        $inc: {
+          xp: xpEarned,
+          'quizStats.attempted': totalQuestions,
+          'quizStats.correct': score
+        },
+        $set: {
+          streakDays: newStreak,
+          longestStreak: newLongestStreak,
+          lastCompletedDate: quizDate,
+          achievements: updatedAchievements
+        }
+      },
+      { returnDocument: 'after' }
     );
+
+    if (!updatedUserDoc) {
+      throw new Error('User not found during update');
+    }
+
+    return {
+      completion,
+      user: sanitizeDoc<DbUser>(updatedUserDoc)
+    };
   }
 
-  public getWeeklyStatus(userId: string, timeZone?: string) {
+  // ----------------------------------------------------
+  // WEEKLY PRACTICE OPERATIONS
+  // ----------------------------------------------------
+
+  public async getWeeklyCompletion(userId: string, cycleId: string): Promise<DbWeeklyCompletion | null> {
+    const col = await this.getWeeklyCol();
+    const completion = await col.findOne({ userId, cycleId });
+    return completion ? sanitizeDoc<DbWeeklyCompletion>(completion) : null;
+  }
+
+  public async getWeeklyStatus(userId: string, timeZone?: string) {
     const cycleInfo = getWeeklyCycleInfo(new Date(), timeZone);
-    const completion = this.getWeeklyCompletion(userId, cycleInfo.cycleId);
-    const history = this.data.weeklyCompletions
-      .filter(c => c.userId === userId)
-      .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
+    const completion = await this.getWeeklyCompletion(userId, cycleInfo.cycleId);
+    const col = await this.getWeeklyCol();
+    const rawHistory = await col.find({ userId }).sort({ completedAt: -1 }).toArray();
+    const history = rawHistory.map(h => sanitizeDoc<DbWeeklyCompletion>(h));
 
     return {
       cycleId: cycleInfo.cycleId,
@@ -680,7 +636,7 @@ class NewsLensDatabase {
     };
   }
 
-  public recordWeeklyCompletion(params: {
+  public async recordWeeklyCompletion(params: {
     userId: string;
     cycleId: string;
     score: number;
@@ -688,25 +644,20 @@ class NewsLensDatabase {
     xpEarned: number;
     answers: Record<string, number>;
     questions: QuizQuestion[];
-  }): {
+  }): Promise<{
     completion: DbWeeklyCompletion;
     user: DbUser;
-  } {
+  }> {
     const { userId, cycleId, score, totalQuestions, xpEarned, answers, questions } = params;
 
-    const user = this.findUserById(userId);
+    const user = await this.findUserById(userId);
     if (!user) throw new Error('User not found');
 
     // Strict constraint check: userId + cycleId
-    const existing = this.getWeeklyCompletion(userId, cycleId);
+    const existing = await this.getWeeklyCompletion(userId, cycleId);
     if (existing) {
       throw new Error("You've already completed this week's practice.");
     }
-
-    // Award XP server-side (Note: Weekly Practice does NOT touch Daily Quiz streak)
-    user.xp += xpEarned;
-    user.quizStats.attempted += totalQuestions;
-    user.quizStats.correct += score;
 
     const completion: DbWeeklyCompletion = {
       id: `wcomp_${crypto.randomBytes(8).toString('hex')}`,
@@ -720,10 +671,39 @@ class NewsLensDatabase {
       completedAt: new Date().toISOString()
     };
 
-    this.data.weeklyCompletions.push(completion);
-    this.save();
+    // Atomic insert into weeklyCompletions with unique compound index
+    const weeklyCol = await this.getWeeklyCol();
+    try {
+      await weeklyCol.insertOne(completion as any);
+    } catch (err: any) {
+      if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
+        throw new Error("You've already completed this week's practice.");
+      }
+      throw err;
+    }
 
-    return { completion, user };
+    // Award XP server-side (Weekly Practice strictly does NOT touch Daily Quiz streak)
+    const usersCol = await this.getUsersCol();
+    const updatedUserDoc = await usersCol.findOneAndUpdate(
+      { id: userId },
+      {
+        $inc: {
+          xp: xpEarned,
+          'quizStats.attempted': totalQuestions,
+          'quizStats.correct': score
+        }
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!updatedUserDoc) {
+      throw new Error('User not found during update');
+    }
+
+    return {
+      completion,
+      user: sanitizeDoc<DbUser>(updatedUserDoc)
+    };
   }
 }
 
