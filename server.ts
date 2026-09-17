@@ -205,29 +205,48 @@ app.get('/api/health', (req: Request, res: Response) => {
     status: 'ok',
     appName: 'NewsLens',
     articlesCount: articlesList.length,
-    hasGeminiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY')
+    hasNewsApiKey: Boolean(process.env.NEWS_API_KEY && process.env.NEWS_API_KEY !== 'MY_NEWS_API_KEY'),
+    hasGeminiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
+    lastFetchedAt: newsService.getLastFetchedAt()
   });
 });
 
 // GET /api/news - list articles with filtering & search using Real News Service
-app.get('/api/news', (req: Request, res: Response) => {
-  const { category, search, featured } = req.query;
+const handleGetNews = async (req: Request, res: Response) => {
+  const { category, search, q, featured } = req.query;
+  const categoryStr = typeof category === 'string' && category !== 'All' ? category : undefined;
+  const searchTerm = typeof search === 'string' ? search : (typeof q === 'string' ? q : undefined);
+
+  // If specific category requested, ensure coverage from NewsAPI
+  if (categoryStr) {
+    try {
+      await newsService.ensureCategoryCoverage(categoryStr);
+    } catch (e) {
+      console.warn(`Could not replenish category ${categoryStr}:`, e);
+    }
+  }
+
   const filtered = newsService.getArticles(
-    typeof category === 'string' ? category : undefined,
-    typeof search === 'string' ? search : undefined,
+    categoryStr,
+    searchTerm,
     featured === 'true'
   );
 
   res.json({
     articles: filtered,
-    total: filtered.length
+    total: filtered.length,
+    lastFetchedAt: newsService.getLastFetchedAt(),
+    isStale: newsService.isCacheExpired()
   });
-});
+};
 
-// POST /api/news/refresh - refresh real news via Gemini with Google Search grounding
+app.get('/api/news', handleGetNews);
+app.get('/api/news/search', handleGetNews);
+
+// POST /api/news/refresh - refresh real news from NewsAPI
 app.post('/api/news/refresh', async (req: Request, res: Response) => {
   const { category } = req.body || {};
-  const result = await newsService.refreshRealNewsFromGemini(category);
+  const result = await newsService.refreshRealNews(true, category);
   const articlesList = newsService.getArticles();
   res.json({
     ...result,
@@ -235,9 +254,9 @@ app.post('/api/news/refresh', async (req: Request, res: Response) => {
   });
 });
 
-// GET /api/news/:id - full article details
-app.get('/api/news/:id', (req: Request, res: Response) => {
-  const article = newsService.getArticleById(req.params.id);
+// GET /api/news/:id - full article details with on-demand Gemini enrichment
+app.get('/api/news/:id', async (req: Request, res: Response) => {
+  const article = await newsService.getArticleById(req.params.id);
   if (!article) {
     res.status(404).json({ error: 'Article not found' });
     return;
@@ -262,6 +281,16 @@ app.get('/api/news/:id', (req: Request, res: Response) => {
     }
   }
 
+  res.json({ article });
+});
+
+// POST /api/news/:id/enrich - on-demand Gemini deep enrichment
+app.post('/api/news/:id/enrich', async (req: Request, res: Response) => {
+  const article = await newsService.enrichArticle(req.params.id);
+  if (!article) {
+    res.status(404).json({ error: 'Article not found' });
+    return;
+  }
   res.json({ article });
 });
 

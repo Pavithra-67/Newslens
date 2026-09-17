@@ -17,6 +17,11 @@ export const ExploreScreen: React.FC = () => {
   } = useApp();
 
   const [activeExploreTab, setActiveExploreTab] = useState<'all' | 'topics' | 'stories'>('all');
+  const [visibleStoriesCount, setVisibleStoriesCount] = useState<number>(12);
+
+  React.useEffect(() => {
+    setVisibleStoriesCount(12);
+  }, [selectedCategory, searchQuery]);
 
   const filteredArticles = articles.filter(a => {
     const isCatMatch = matchesCategory(a.category, selectedCategory);
@@ -182,16 +187,30 @@ export const ExploreScreen: React.FC = () => {
               News Stories
             </h2>
             <span className="text-xs text-slate-400">
-              {filteredArticles.length} found
+              Showing {Math.min(visibleStoriesCount, filteredArticles.length)} of {filteredArticles.length} found
             </span>
           </div>
 
           {filteredArticles.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {filteredArticles.map(art => (
-                <ArticleCard key={art.id} article={art} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {filteredArticles.slice(0, visibleStoriesCount).map(art => (
+                  <ArticleCard key={art.id} article={art} />
+                ))}
+              </div>
+
+              {filteredArticles.length > visibleStoriesCount && (
+                <div className="flex justify-center pt-3">
+                  <button
+                    onClick={() => setVisibleStoriesCount(prev => prev + 12)}
+                    className="px-5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                    id="explore-load-more-btn"
+                  >
+                    Load More Stories ({filteredArticles.length - visibleStoriesCount} remaining)
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800">
               <p className="text-sm text-slate-500 dark:text-slate-400">

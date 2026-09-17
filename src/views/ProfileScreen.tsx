@@ -17,6 +17,7 @@ import {
   LogIn
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { NewsLensLogo } from '../components/NewsLensLogo';
 
 export const ProfileScreen: React.FC = () => {
   const {
@@ -87,14 +88,10 @@ export const ProfileScreen: React.FC = () => {
 
       {/* Profile Header */}
       <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-4">
           <div className="relative">
-            <img
-              src={currentUser?.avatar || userProfile.avatar}
-              alt={currentUser?.name || userProfile.name}
-              className="w-16 h-16 rounded-2xl object-cover ring-4 ring-indigo-500/20"
-            />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] ring-2 ring-white dark:ring-slate-900">
+            <NewsLensLogo size="lg" />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] ring-2 ring-white dark:ring-slate-900 shadow-xs">
               ✓
             </div>
           </div>
@@ -108,8 +105,11 @@ export const ProfileScreen: React.FC = () => {
                 {currentUser?.role === 'admin' ? 'Educator / Admin' : 'Student'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {currentUser?.email || 'Guest Explorer'} • Level {userProgress.level} ({userProgress.levelTitle})
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+              {currentUser?.email || 'Guest Explorer'}
+            </p>
+            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 mt-0.5 font-semibold">
+              Level {userProgress.level} ({userProgress.levelTitle})
             </p>
           </div>
         </div>

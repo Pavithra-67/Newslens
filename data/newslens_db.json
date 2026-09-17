@@ -893,6 +893,99 @@
       ],
       "readHistory": [],
       "createdAt": "2026-09-16T23:42:58.857Z"
+    },
+    {
+      "id": "usr_2219eb1a840eed17",
+      "name": "Alice Learner",
+      "email": "test_student_1789606298199@example.com",
+      "passwordHash": "bdec4e770c83a187a64ca41b24a58093015ef98ab1ae74a1029b8805577f6ead914e6c3ec280417265288640058d7d5e61345c0373d7dbb9c9b671ecefbf7b4c",
+      "salt": "a5c41fde2c797b6e6c50750c2695e3c2",
+      "role": "student",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Alice%20Learner",
+      "xp": 175,
+      "streakDays": 0,
+      "longestStreak": 0,
+      "lastCompletedDate": null,
+      "storiesReadCount": 0,
+      "savedArticleIds": [],
+      "interests": [
+        "India",
+        "World",
+        "Science & Technology",
+        "Environment"
+      ],
+      "explanationStyle": "student",
+      "quizStats": {
+        "attempted": 7,
+        "correct": 7,
+        "byCategory": {}
+      },
+      "predictionStats": {
+        "total": 0,
+        "resolved": 0,
+        "correct": 0,
+        "byCategory": {}
+      },
+      "achievements": [
+        {
+          "id": "first-story",
+          "title": "First Step",
+          "description": "Read and understand your first news story",
+          "icon": "BookOpen",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "first-quiz",
+          "title": "Quiz Initiate",
+          "description": "Complete your first 5-question Daily Challenge",
+          "icon": "Award",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "streak-7",
+          "title": "7-Day Streak",
+          "description": "Maintain a 7-day continuous news learning habit",
+          "icon": "Flame",
+          "currentProgress": 0,
+          "maxProgress": 7
+        },
+        {
+          "id": "xp-500",
+          "title": "Knowledge Apprentice",
+          "description": "Accumulate 500 total XP points",
+          "icon": "Zap",
+          "currentProgress": 0,
+          "maxProgress": 500
+        },
+        {
+          "id": "first-prediction",
+          "title": "Future Forecaster",
+          "description": "Make your first prediction in \"What Happens Next?\"",
+          "icon": "Compass",
+          "currentProgress": 0,
+          "maxProgress": 1
+        },
+        {
+          "id": "science-explorer",
+          "title": "Science Explorer",
+          "description": "Read 5 Science & Technology articles",
+          "icon": "Atom",
+          "currentProgress": 0,
+          "maxProgress": 5
+        },
+        {
+          "id": "policy-analyst",
+          "title": "Policy Analyst",
+          "description": "Answer 5 Business & Governance questions correctly",
+          "icon": "Scale",
+          "currentProgress": 0,
+          "maxProgress": 5
+        }
+      ],
+      "readHistory": [],
+      "createdAt": "2026-09-17T00:51:38.232Z"
     }
   ],
   "sessions": [
@@ -955,6 +1048,12 @@
       "userId": "usr_7f44cb7e2b126f6f",
       "createdAt": "2026-09-16T23:42:58.858Z",
       "expiresAt": "2026-10-16T23:42:58.858Z"
+    },
+    {
+      "token": "sess_d4958fa7432ea7a832fbb12ca32349a9d506e52fe5da0aad",
+      "userId": "usr_2219eb1a840eed17",
+      "createdAt": "2026-09-17T00:51:38.233Z",
+      "expiresAt": "2026-10-17T00:51:38.233Z"
     }
   ],
   "dailyCompletions": [
@@ -1066,6 +1165,140 @@
         "dc-q3": 0
       },
       "completedAt": "2026-09-16T23:42:58.877Z"
+    }
+  ],
+  "weeklyCompletions": [
+    {
+      "id": "wcomp_3bb8e57285db34dc",
+      "userId": "usr_2219eb1a840eed17",
+      "cycleId": "2026-W38",
+      "score": 7,
+      "totalQuestions": 7,
+      "xpAwarded": 175,
+      "answers": {
+        "q-semi-1": 1,
+        "q-spadex-1": 1,
+        "q-ai-1": 1,
+        "q-renew-1": 1,
+        "q-cbdc-1": 0,
+        "q-plastic-1": 0,
+        "q-sports-1": 1
+      },
+      "questions": [
+        {
+          "id": "q-semi-1",
+          "question": "What percentage of capital expenditure does the India Semiconductor Mission subsidize for approved commercial fabs?",
+          "type": "multiple_choice",
+          "options": [
+            "25%",
+            "50%",
+            "75%",
+            "100%"
+          ],
+          "correctIndex": 1,
+          "explanation": "Under the India Semiconductor Mission (ISM), the central government covers 50% of the project capital expenditure on an equal footing.",
+          "xpReward": 20,
+          "category": "India",
+          "articleId": "india-semiconductor-mission-fabs"
+        },
+        {
+          "id": "q-spadex-1",
+          "question": "What is the primary objective of ISRO’s SPADEX mission?",
+          "type": "multiple_choice",
+          "options": [
+            "Asteroid mining",
+            "Autonomous in-orbit rendezvous and spacecraft docking",
+            "Deep sea communication",
+            "Solar flare monitoring"
+          ],
+          "correctIndex": 1,
+          "explanation": "SPADEX (Space Docking Experiment) tests autonomous rendezvous and docking between two spacecraft in low-Earth orbit.",
+          "xpReward": 20,
+          "category": "Space",
+          "articleId": "isro-spadex-docking-mission"
+        },
+        {
+          "id": "q-ai-1",
+          "question": "In AI development, what is the process of deliberately challenging a model to find vulnerabilities called?",
+          "type": "multiple_choice",
+          "options": [
+            "Benchmarking",
+            "Red-teaming",
+            "Fine-tuning",
+            "Quantization"
+          ],
+          "correctIndex": 1,
+          "explanation": "Red-teaming is an adversarial testing method where security and alignment specialists attempt to provoke flaws or safety breaches in a system.",
+          "xpReward": 20,
+          "category": "Science & Technology",
+          "articleId": "global-ai-safety-standards-summit"
+        },
+        {
+          "id": "q-renew-1",
+          "question": "What technology has seen rapid cost declines to enable solar power to be used reliably during nighttime hours?",
+          "type": "multiple_choice",
+          "options": [
+            "Flywheel spinning wheels",
+            "Utility-scale Battery Energy Storage Systems (BESS)",
+            "Diesel backup pumps",
+            "Geothermal steam tubes"
+          ],
+          "correctIndex": 1,
+          "explanation": "Utility-scale battery energy storage systems (BESS) capture excess solar power during midday and discharge it to the electrical grid at night.",
+          "xpReward": 20,
+          "category": "Environment",
+          "articleId": "global-renewable-grid-expansion-iea"
+        },
+        {
+          "id": "q-cbdc-1",
+          "question": "What is the fundamental difference between the e-Rupee (CBDC) and standard UPI transfers?",
+          "type": "reasoning",
+          "options": [
+            "The e-Rupee is a direct digital sovereign liability of the RBI that can settle offline, whereas UPI transfers commercial bank balances requiring connectivity",
+            "UPI is illegal whereas e-Rupee is legal",
+            "e-Rupee is a volatile cryptocurrency like Bitcoin",
+            "UPI only works outside of India"
+          ],
+          "correctIndex": 0,
+          "explanation": "CBDC is direct central bank sovereign money (like physical cash), while UPI is a payment rail that transfers commercial bank balances between accounts.",
+          "xpReward": 20,
+          "category": "Business",
+          "articleId": "india-digital-rupee-cbdc-expansion"
+        },
+        {
+          "id": "q-plastic-1",
+          "question": "What is the key debate dividing countries at the UN Global Plastics Treaty negotiations?",
+          "type": "multiple_choice",
+          "options": [
+            "Whether to cap primary plastic production versus focusing only on recycling and waste management",
+            "Whether plastic can conduct electricity",
+            "Whether paper bags should be banned in restaurants",
+            "Whether plastics can float on saltwater"
+          ],
+          "correctIndex": 0,
+          "explanation": "A major sticking point is whether to set mandatory limits on the upstream production of virgin plastics, or focus primarily on downstream recycling and waste cleanup.",
+          "xpReward": 20,
+          "category": "World",
+          "articleId": "un-global-plastics-treaty-talks"
+        },
+        {
+          "id": "q-sports-1",
+          "question": "What is a \"hybrid model\" in international tournament hosting?",
+          "type": "multiple_choice",
+          "options": [
+            "Playing matches with both wooden and metal bats",
+            "Splitting fixtures across home venues and neutral third-country locations to navigate security or diplomatic constraints",
+            "Playing half the game as cricket and half as football",
+            "Allowing robots to bowl for human players"
+          ],
+          "correctIndex": 1,
+          "explanation": "In a hybrid hosting model, certain matches are staged at a neutral venue in another country to resolve diplomatic or travel hurdles without disrupting the tournament.",
+          "xpReward": 20,
+          "category": "Sports",
+          "articleId": "icc-champions-trophy-hybrid-scheduling"
+        }
+      ],
+      "completedAt": "2026-09-17T00:51:38.243Z"
     }
   ]
 }

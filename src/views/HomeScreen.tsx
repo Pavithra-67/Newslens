@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles, Layers, BookOpen, Clock, ChevronRight, RotateCw, Globe } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Layers, BookOpen, Clock, ChevronRight, RotateCw, Globe, ArrowDown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TopStoryCard } from '../components/TopStoryCard';
 import { ArticleCard } from '../components/ArticleCard';
@@ -18,6 +18,13 @@ export const HomeScreen: React.FC = () => {
     isRefreshingNews
   } = useApp();
 
+  // Pagination: initially show 12 articles, load more from cached pool
+  const [visibleCount, setVisibleCount] = useState<number>(12);
+
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [selectedCategory]);
+
   // Find top story (or first featured)
   const topStory = articles.find(a => a.isFeatured) || articles[0];
 
@@ -26,6 +33,8 @@ export const HomeScreen: React.FC = () => {
     if (selectedCategory === 'All') return a.id !== topStory?.id;
     return matchesCategory(a.category, selectedCategory);
   });
+
+  const displayedArticles = filteredArticles.slice(0, visibleCount);
 
   // Continue learning stories (from history)
   const continueStories = userProgress.readHistory
@@ -54,7 +63,7 @@ export const HomeScreen: React.FC = () => {
           <button
             onClick={() => refreshNews()}
             disabled={isRefreshingNews}
-            title="Fetch current real-world news using Google Search grounding"
+            title="Fetch current real-world news from NewsAPI"
             className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs transition-all"
             id="refresh-real-news-btn"
           >
@@ -94,23 +103,47 @@ export const HomeScreen: React.FC = () => {
             Today's Picks
           </h2>
           <span className="text-xs text-slate-400 font-medium">
-            {filteredArticles.length} curated stories
+            Showing {displayedArticles.length} of {filteredArticles.length} stories
           </span>
         </div>
 
         <CategoryPills />
 
-        {filteredArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 mt-3">
-            {filteredArticles.map(article => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
+        {displayedArticles.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 mt-3">
+              {displayedArticles.map(article => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+
+            {/* Pagination / Load More from Cached Pool */}
+            {filteredArticles.length > visibleCount && (
+              <div className="flex justify-center pt-3">
+                <button
+                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-2 group"
+                  id="home-load-more-btn"
+                >
+                  <ArrowDown className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:translate-y-0.5 transition-transform" />
+                  <span>Load More Stories ({filteredArticles.length - visibleCount} remaining)</span>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              No stories found in this category right now.
+              Live news is temporarily unavailable or no stories match this category right now.
             </p>
+            <button
+              onClick={() => refreshNews(selectedCategory !== 'All' ? selectedCategory : undefined)}
+              disabled={isRefreshingNews}
+              className="mt-3.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer transition-all shadow-xs"
+              id="retry-news-btn"
+            >
+              {isRefreshingNews ? 'Syncing...' : 'Retry Live Sync'}
+            </button>
           </div>
         )}
       </section>

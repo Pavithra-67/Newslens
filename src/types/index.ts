@@ -93,11 +93,16 @@ export interface Article {
   headline: string;
   category: NewsCategory;
   heroImage: string;
+  imageUrl?: string;
+  description?: string;
   sourceName: string;
   sourceUrl: string;
   publishedAt: string;
   readingTimeMinutes: number;
   isFeatured?: boolean;
+  author?: string;
+  retrievedAt?: string;
+  isEnriched?: boolean;
   isSensitive?: boolean;
   sensitiveReason?: string;
   coveredSourcesCount: number;

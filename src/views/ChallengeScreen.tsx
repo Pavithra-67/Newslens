@@ -322,51 +322,55 @@ export const ChallengeScreen: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{weeklyQuizStatus?.cycleLabel || "This Week's Practice Completed"}</span>
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Weekly Practice • ✓ Completed</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-              You have already completed this week's practice!
+              You've already completed this week's practice.
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Your score and XP for this 7-day cycle are safely recorded. Weekly Practice is limited to one completion per week to encourage structured learning.
+              Your official weekly assessment for <span className="font-bold text-slate-700 dark:text-slate-200">{weeklyQuizStatus?.cycleLabel}</span> is saved. One Weekly Practice can be completed per 7-day cycle.
             </p>
           </div>
 
-          {/* Weekly Score Box */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-md mx-auto">
+          {/* Weekly Score & Details Box */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto">
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
               <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
                 {weeklyQuizStatus?.completion?.score ?? 0}/{weeklyQuizStatus?.completion?.totalQuestions ?? weeklyChallenge.questions.length}
               </div>
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Your Score</div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Score</div>
             </div>
+
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
-              <div className="text-2xl font-black text-amber-500">
-                +{weeklyQuizStatus?.completion?.xpAwarded ?? 0}
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                {weeklyQuizStatus?.completion?.score ?? 0} Correct
               </div>
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">XP Earned</div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Correct Answers</div>
             </div>
-            <div className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
-              <div className="text-2xl font-black text-emerald-500">
-                1 / 1
+
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+              <div className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-200 pt-1">
+                {weeklyQuizStatus?.completion?.completedAt
+                  ? new Date(weeklyQuizStatus.completion.completedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                  : 'Recorded'}
               </div>
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Weekly Limit</div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Completed</div>
             </div>
           </div>
 
-          {/* Countdown & Unlock Information */}
-          <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/50 max-w-md mx-auto flex items-center gap-3 text-left">
+          {/* 7-Day Cycle Availability Notice */}
+          <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/50 max-w-lg mx-auto flex items-center gap-3 text-left">
             <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
               <Lock className="w-5 h-5" />
             </div>
             <div className="space-y-0.5 text-xs">
-              <p className="font-black text-amber-900 dark:text-amber-200">
-                Next Weekly Practice unlocks in {weeklyQuizStatus?.daysRemaining ?? 7} {(weeklyQuizStatus?.daysRemaining ?? 7) === 1 ? 'day' : 'days'}
+              <p className="font-bold text-amber-900 dark:text-amber-200">
+                "New practice will be available after the current 7-day cycle."
               </p>
               <p className="text-amber-700/90 dark:text-amber-300/80">
-                Available on Monday, {weeklyQuizStatus?.nextCycleDate || 'next week'}. Fresh questions will be generated from real current news stories!
+                Next cycle unlocks on Monday, {weeklyQuizStatus?.nextCycleDate || 'next week'} ({weeklyQuizStatus?.daysRemaining ?? 7} {(weeklyQuizStatus?.daysRemaining ?? 7) === 1 ? 'day' : 'days'} remaining). Fresh questions will be generated from newly retrieved real news stories.
               </p>
             </div>
           </div>
@@ -402,7 +406,10 @@ export const ChallengeScreen: React.FC = () => {
                 </span>
               </div>
               <div className="space-y-3.5">
-                {weeklyChallenge.questions.map((q, idx) => {
+                {(weeklyQuizStatus?.completion?.questions && weeklyQuizStatus.completion.questions.length > 0
+                  ? weeklyQuizStatus.completion.questions
+                  : weeklyChallenge.questions
+                ).map((q, idx) => {
                   const userChoice = weeklyQuizStatus?.completion?.answers?.[q.id];
                   const hasUserAnswer = userChoice !== undefined;
                   const isUserCorrect = userChoice === q.correctIndex;

@@ -38,8 +38,8 @@ export const ArticleDetailScreen: React.FC<ArticleDetailScreenProps> = ({ articl
 
   const saved = isArticleSaved(article.id);
   const [explanationMode, setExplanationMode] = useState<ExplanationStyle>('student');
-  const [selectedTerm, setSelectedTerm] = useState<KeyTerm | null>(article.keyTerms[0] || null);
-  const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(article.stakeholders[0] || null);
+  const [selectedTerm, setSelectedTerm] = useState<KeyTerm | null>(article.keyTerms?.[0] || null);
+  const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(article.stakeholders?.[0] || null);
   const [revealSensitive, setRevealSensitive] = useState<boolean>(!article.isSensitive);
 
   const formatTime = (isoString: string) => {

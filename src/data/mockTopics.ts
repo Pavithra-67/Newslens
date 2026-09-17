@@ -22,7 +22,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'Fulfilling the ₹76,000 crore India Semiconductor Mission to build commercial fabs for mature nodes (28nm+) for cars and power grids.'
       }
     ],
-    articleIds: ['india-semiconductor-mission', 'solid-state-battery-ev'],
+    articleIds: ['india-semiconductor-mission', 'global-ai-safety-standards-summit'],
     quickQuiz: [
       {
         id: 'qq-chip-1',
@@ -57,7 +57,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'The amount of goods that one unit of currency can buy. High inflation reduces your real purchasing power over time.'
       }
     ],
-    articleIds: ['rbi-repo-rate-decision'],
+    articleIds: ['india-digital-rupee-cbdc-expansion'],
     quickQuiz: [
       {
         id: 'qq-inflation-1',
@@ -92,7 +92,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'Recycling 98% of astronaut sweat and urine into ultra-pure drinking water and splitting water into breathable oxygen.'
       }
     ],
-    articleIds: ['chandrayaan-space-station'],
+    articleIds: ['spadex-space-docking-isro'],
     quickQuiz: [
       {
         id: 'qq-space-1',
@@ -132,7 +132,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'Using radar satellites, mountain seismic sensors, and cellular broadcasts to evacuate vulnerable populations before floods strike.'
       }
     ],
-    articleIds: ['himalayan-glacier-ai-warning', 'un-loss-damage-climate-fund'],
+    articleIds: ['global-renewable-grid-expansion-iea', 'un-global-plastics-treaty-talks'],
     quickQuiz: [
       {
         id: 'qq-climate-1',
@@ -172,7 +172,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'Connecting domestic central bank payment gateways internationally to make remittances cheap and instantaneous.'
       }
     ],
-    articleIds: ['india-upi-digital-infrastructure'],
+    articleIds: ['india-digital-rupee-cbdc-expansion', 'india-semiconductor-mission'],
     quickQuiz: [
       {
         id: 'qq-india-dpi-1',
@@ -208,7 +208,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'Harmonizing legal definitions across jurisdictions to prevent regulatory arbitrage.'
       }
     ],
-    articleIds: ['global-ai-safety-accord'],
+    articleIds: ['global-ai-safety-standards-summit', 'un-global-plastics-treaty-talks'],
     quickQuiz: [
       {
         id: 'qq-world-1',
@@ -244,7 +244,7 @@ export const MOCK_TOPICS: TopicInfo[] = [
         explanation: 'Allowing students to blend computer science with music, design, or environmental engineering seamlessly.'
       }
     ],
-    articleIds: ['nep-vocational-credits'],
+    articleIds: ['nep-curriculum-ai-vocational-framework'],
     quickQuiz: [
       {
         id: 'qq-edu-1',
@@ -265,22 +265,22 @@ export const MOCK_TOPICS: TopicInfo[] = [
   },
   {
     id: 'topic-sports-analytics',
-    name: 'Sports Analytics & Grandmaster Chess',
+    name: 'Sports Logistics & Hybrid Tournaments',
     category: 'Sports',
     icon: 'TrendingUp',
-    tagline: 'How data analytics, neural engines, and youth academies produce champions.',
-    summary: 'From AI chess engines calculating 40 moves ahead to biometric load tracking in athletics, modern sports relies heavily on science, discipline, and data-driven training.',
+    tagline: 'How international sports bodies schedule tournaments across multi-nation corridors.',
+    summary: 'From hybrid neutral-venue protocols to broadcasting primetime slots, modern sports administration balances geopolitics, athlete welfare, and global audience access.',
     keyConcepts: [
       {
-        term: 'Neural Engine Preparation',
-        explanation: 'Using neural network evaluations (Stockfish, Leela Chess Zero) to analyze novel opening novelties.'
+        term: 'Hybrid Hosting Model',
+        explanation: 'Staging fixtures across multiple host and neutral nations to navigate diplomatic or travel clearances without tournament cancellation.'
       },
       {
-        term: 'Biometric Load Management',
-        explanation: 'Tracking heart-rate variability and recovery to maximize peak performance during high-stakes championships.'
+        term: 'Broadcast Window Logistics',
+        explanation: 'Synchronizing international match timings to maximize live viewership across global timezones.'
       }
     ],
-    articleIds: ['india-chess-olympiad-victory'],
+    articleIds: ['icc-champions-trophy-hybrid-scheduling'],
     quickQuiz: [
       {
         id: 'qq-sports-1',

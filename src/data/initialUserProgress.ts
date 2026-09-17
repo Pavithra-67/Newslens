@@ -67,7 +67,7 @@ export const INITIAL_USER_PROFILE: UserProfile = {
   id: 'usr-student-01',
   name: 'Pavithra Sankari',
   email: 'pavi.sankari26@gmail.com',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+  avatar: '',
   role: 'student',
   createdAt: '2026-09-01T00:00:00Z'
 };

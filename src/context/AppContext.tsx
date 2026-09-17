@@ -12,7 +12,6 @@ import {
   WeeklyQuizStatus,
   WeeklyQuizCompletion
 } from '../types';
-import { MOCK_ARTICLES } from '../data/mockArticles';
 import { MOCK_DAILY_CHALLENGE, MOCK_WEEKLY_CHALLENGE } from '../data/mockQuizzes';
 import { MOCK_TOPICS } from '../data/mockTopics';
 import { INITIAL_USER_PROFILE, INITIAL_USER_PROGRESS } from '../data/initialUserProgress';
@@ -122,7 +121,7 @@ interface AppContextType {
   }>;
 
   // Real News Retrieval
-  refreshNews: () => Promise<{ success: boolean; count: number; error?: string }>;
+  refreshNews: (category?: string) => Promise<{ success: boolean; count: number; error?: string }>;
   isRefreshingNews: boolean;
 }
 
@@ -158,7 +157,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const [articles, setArticles] = useState<Article[]>(MOCK_ARTICLES);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [topics] = useState<TopicInfo[]>(MOCK_TOPICS);
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge>(MOCK_DAILY_CHALLENGE);
   const [weeklyChallenge, setWeeklyChallenge] = useState<WeeklyChallenge>(MOCK_WEEKLY_CHALLENGE);
@@ -411,6 +410,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       .catch(() => {});
   }, []);
 
+  // Ensure category coverage when a category is selected
+  useEffect(() => {
+    if (selectedCategory && selectedCategory !== 'All') {
+      fetch(`/api/news?category=${encodeURIComponent(selectedCategory)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.articles && data.articles.length > 0) {
+            setArticles(prev => {
+              const existingIds = new Set(prev.map(a => a.id));
+              const fresh = data.articles.filter((a: Article) => !existingIds.has(a.id));
+              return fresh.length > 0 ? [...prev, ...fresh] : prev;
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [selectedCategory]);
+
   // Auth: Login
   const login = async (email: string, password: string) => {
     try {
@@ -435,7 +452,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       showNotification(`Welcome back, ${data.user.name.split(' ')[0]}! 🌟`);
 
-      // Refresh daily status with new auth token
+      // Refresh daily and weekly statuses with new auth token
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       fetch(`/api/quiz/daily-status?tz=${encodeURIComponent(tz)}`, {
         headers: { Authorization: `Bearer ${data.token}` }
@@ -443,6 +460,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         .then(r => r.json())
         .then(status => setDailyQuizStatus(status))
         .catch(() => {});
+
+      checkWeeklyQuizStatus();
 
       return { success: true };
     } catch (e: any) {
@@ -474,7 +493,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       showNotification(`Account created! Welcome to NewsLens, ${name.split(' ')[0]}! 🎉`);
 
-      // Check daily status with new token
+      // Check daily and weekly statuses with new token
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       fetch(`/api/quiz/daily-status?tz=${encodeURIComponent(tz)}`, {
         headers: { Authorization: `Bearer ${data.token}` }
@@ -482,6 +501,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         .then(r => r.json())
         .then(status => setDailyQuizStatus(status))
         .catch(() => {});
+
+      checkWeeklyQuizStatus();
 
       return { success: true };
     } catch (e: any) {
@@ -507,6 +528,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setUserProfile(INITIAL_USER_PROFILE);
       setUserProgress(INITIAL_USER_PROGRESS);
       setDailyQuizStatus(null);
+      setWeeklyQuizStatus(null);
+      checkWeeklyQuizStatus();
       showNotification('Signed out successfully.');
     }
   };
@@ -546,10 +569,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     window.location.hash = `article/${id}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Track read story with auth if available
+    // Track read story with auth if available and retrieve full enriched payload
     fetch(`/api/news/${id}`, {
       headers: getAuthHeaders()
-    }).catch(() => {});
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.article) {
+          setArticles(prev => prev.map(a => a.id === id ? { ...a, ...data.article } : a));
+        }
+      })
+      .catch(() => {});
 
     setUserProgress(prev => {
       const alreadyRead = prev.readHistory.some(h => h.articleId === id);
@@ -802,28 +832,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  // Refresh Real-Time News via Gemini + Google Search Grounding
-  const refreshNews = async () => {
+  // Refresh Real-Time News via NewsAPI + on-demand Gemini
+  const refreshNews = async (category?: string) => {
     setIsRefreshingNews(true);
     try {
       const res = await fetch('/api/news/refresh', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({ category })
       });
       const data = await res.json();
-      if (res.ok) {
-        const newsRes = await fetch('/api/news');
-        const newsData = await newsRes.json();
-        if (newsData.articles) {
-          setArticles(newsData.articles);
-        }
-        checkWeeklyQuizStatus();
-        showNotification('Fresh real-time news retrieved via Google Search grounding! 🌐');
-        return { success: true, count: newsData.articles?.length || 0 };
+      const newsRes = await fetch('/api/news');
+      const newsData = await newsRes.json();
+      if (newsData.articles) {
+        setArticles(newsData.articles);
       }
-      return { success: false, count: articles.length, error: data.error };
+      checkWeeklyQuizStatus();
+      showNotification(`Synced ${newsData.articles?.length || data.count || 0} real news stories from NewsAPI! 🌐`);
+      return { success: true, count: newsData.articles?.length || 0 };
     } catch (e: any) {
+      showNotification('Could not sync fresh news right now. Showing cached coverage.', 'info');
       return { success: false, count: articles.length, error: e.message };
     } finally {
       setIsRefreshingNews(false);

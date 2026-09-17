@@ -1,6 +1,7 @@
 import React from 'react';
-import { Flame, Moon, Sun, Search, Sparkles, ShieldCheck, LogIn, User } from 'lucide-react';
+import { Flame, Moon, Sun, Search, Sparkles, ShieldCheck, LogIn } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { NewsLensLogo } from './NewsLensLogo';
 
 export const Navbar: React.FC = () => {
   const {
@@ -33,9 +34,7 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-2 text-left focus:outline-none group cursor-pointer"
             id="brand-logo-btn"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
-            </div>
+            <NewsLensLogo size="md" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">
@@ -107,19 +106,15 @@ export const Navbar: React.FC = () => {
             <span>Verified</span>
           </button>
 
-          {/* Profile Avatar or Sign In button */}
+          {/* Consistent NewsLens Logo Identity for Account */}
           {currentUser ? (
             <button
               onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-2 p-1 rounded-full ring-2 ring-indigo-500/30 hover:ring-indigo-500 transition-all cursor-pointer"
-              title="Open profile"
+              className="flex items-center gap-2 p-1 rounded-xl ring-2 ring-indigo-500/20 hover:ring-indigo-500/60 transition-all cursor-pointer"
+              title={`Account: ${currentUser.name}`}
               id="profile-avatar-btn"
             >
-              <img
-                src={currentUser.avatar || userProfile.avatar}
-                alt={currentUser.name}
-                className="w-7 h-7 rounded-full object-cover"
-              />
+              <NewsLensLogo size="xs" />
             </button>
           ) : (
             <button
