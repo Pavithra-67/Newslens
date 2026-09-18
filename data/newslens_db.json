@@ -1147,6 +1147,30 @@
       "userId": "usr_2219eb1a840eed17",
       "createdAt": "2026-09-17T00:51:38.233Z",
       "expiresAt": "2026-10-17T00:51:38.233Z"
+    },
+    {
+      "token": "sess_d161e906dcc281b9fa71387d3917cb6d1c48cc2fcb87d7de",
+      "userId": "usr_pavi_default",
+      "createdAt": "2026-09-18T00:11:22.050Z",
+      "expiresAt": "2026-10-18T00:11:22.050Z"
+    },
+    {
+      "token": "sess_0e001c368e8fb27fe504859332a57a0f0bdda16089486658",
+      "userId": "usr_student_demo",
+      "createdAt": "2026-09-18T00:11:24.196Z",
+      "expiresAt": "2026-10-18T00:11:24.196Z"
+    },
+    {
+      "token": "sess_a3950947ee120e1f905f0bc637614e7c92cae7492b37762a",
+      "userId": "usr_pavi_default",
+      "createdAt": "2026-09-18T00:21:26.354Z",
+      "expiresAt": "2026-10-18T00:21:26.354Z"
+    },
+    {
+      "token": "sess_d93fe26fcc81c22af6121611e099598e883e3fcb3713d7ac",
+      "userId": "usr_pavi_default",
+      "createdAt": "2026-09-18T00:22:10.602Z",
+      "expiresAt": "2026-10-18T00:22:10.602Z"
     }
   ],
   "dailyCompletions": [

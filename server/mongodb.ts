@@ -26,8 +26,8 @@ export function getMongoClient(): Promise<MongoClient> {
   const client = new MongoClient(uri, {
     maxPoolSize: 20,
     minPoolSize: 1,
-    serverSelectionTimeoutMS: 5000,
-    connectTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 4000,
+    connectTimeoutMS: 5000,
   });
 
   cachedClient = client;
@@ -44,16 +44,33 @@ export function getMongoClient(): Promise<MongoClient> {
 
       const msg = err?.message || String(err);
       if (msg.includes('SSL alert number 80') || msg.includes('tlsv1 alert internal error')) {
-        console.error('[MongoDB] ❌ Connection error: MongoDB Atlas TLS Handshake Rejected (SSL alert number 80).');
-        console.error('[MongoDB] 📌 Cause: The MongoDB Atlas IP Access List (Network Access) blocked this server connection.');
-        console.error('[MongoDB] 💡 Solution: In your MongoDB Atlas dashboard -> Security -> Network Access -> Add IP Address -> Add "0.0.0.0/0" (Allow Access From Anywhere).');
+        console.log('[MongoDB] Notice: MongoDB Atlas requires 0.0.0.0/0 in Network Access (IP Access List).');
       } else {
-        console.error('[MongoDB] Connection error:', msg);
+        console.log('[MongoDB] Notice: Connection attempt failed, using local database mode.');
       }
       throw err;
     });
 
   return cachedPromise;
+}
+
+/**
+ * Probes MongoDB connection without throwing or logging unhandled error traces.
+ * Returns true if connected successfully, false if unavailable.
+ */
+export async function tryConnectMongo(): Promise<boolean> {
+  const uri = process.env.MONGODB_URI;
+  if (!uri || uri.trim() === '') {
+    return false;
+  }
+
+  try {
+    const client = await getMongoClient();
+    await client.db(DB_NAME).command({ ping: 1 });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**

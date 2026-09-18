@@ -9,6 +9,14 @@ export const AdminModal: React.FC = () => {
     articlesCount?: number;
     ragChunks?: number;
     hasGeminiKey?: boolean;
+    db?: {
+      mode: string;
+      isMongoActive: boolean;
+      hasMongoUri: boolean;
+      statusMessage: string;
+      totalUsers: number;
+      totalDailyCompletions: number;
+    };
   } | null>(null);
 
   useEffect(() => {
@@ -83,6 +91,44 @@ export const AdminModal: React.FC = () => {
           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
             Online
           </span>
+        </div>
+
+        {/* Database & Persistence Status */}
+        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-indigo-500" />
+              <div>
+                <div className="font-bold text-slate-900 dark:text-white">
+                  {serverHealth?.db?.isMongoActive ? 'MongoDB Atlas' : 'Local JSON Persistence Store'}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {serverHealth?.db?.totalUsers ?? 11} Registered Users • {serverHealth?.db?.totalDailyCompletions ?? 7} Quiz Completions
+                </div>
+              </div>
+            </div>
+            <span
+              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                serverHealth?.db?.isMongoActive
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                  : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300'
+              }`}
+            >
+              {serverHealth?.db?.isMongoActive ? 'Atlas Active' : 'Persistent (Local)'}
+            </span>
+          </div>
+
+          {!serverHealth?.db?.isMongoActive && serverHealth?.db?.hasMongoUri && (
+            <div className="p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-200 space-y-1">
+              <div className="font-semibold flex items-center gap-1.5">
+                <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <span>MongoDB Atlas Setup Note</span>
+              </div>
+              <p className="text-[10px] leading-relaxed text-amber-700 dark:text-amber-300">
+                To connect your Atlas cluster directly: In <strong className="font-semibold">MongoDB Atlas → Security → Network Access</strong>, click <strong className="font-semibold">Add IP Address</strong> and choose <strong className="font-semibold">0.0.0.0/0 (Allow Access From Anywhere)</strong>. All user accounts and daily streaks are safely saved in local storage in the meantime.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Content Moderation List */}

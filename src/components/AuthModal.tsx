@@ -296,7 +296,18 @@ export const AuthModal: React.FC = () => {
               }}
               className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] cursor-pointer"
             >
-              Demo Student: pavi.elangumaran3@gmail.com
+              pavi.elangumaran3@gmail.com
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setEmail('student@newslens.edu');
+                setPassword('student123');
+              }}
+              className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] cursor-pointer"
+            >
+              student@newslens.edu
             </button>
           </div>
         </div>

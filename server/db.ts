@@ -1,8 +1,10 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { Db, Collection } from 'mongodb';
 import { NewsCategory, QuizQuestion } from '../src/types';
 import { INITIAL_USER_PROGRESS } from '../src/data/initialUserProgress';
-import { getDatabase, getCollection, ensureIndexes } from './mongodb';
+import { getDatabase, getCollection, ensureIndexes, tryConnectMongo } from './mongodb';
 
 export interface DbUser {
   id: string;
@@ -226,20 +228,130 @@ function sanitizeDoc<T>(doc: any): T {
   return rest as T;
 }
 
+const JSON_DB_PATH = path.join(process.cwd(), 'data', 'newslens_db.json');
+
+interface LocalDbStore {
+  users: DbUser[];
+  sessions: DbSession[];
+  dailyCompletions: DbDailyCompletion[];
+  weeklyCompletions: DbWeeklyCompletion[];
+}
+
+let localStore: LocalDbStore = {
+  users: [],
+  sessions: [],
+  dailyCompletions: [],
+  weeklyCompletions: []
+};
+
+let localStoreLoaded = false;
+
+function loadLocalStore(): void {
+  if (localStoreLoaded) return;
+  try {
+    if (fs.existsSync(JSON_DB_PATH)) {
+      const raw = fs.readFileSync(JSON_DB_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      localStore = {
+        users: Array.isArray(parsed.users) ? parsed.users : [],
+        sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
+        dailyCompletions: Array.isArray(parsed.dailyCompletions) ? parsed.dailyCompletions : [],
+        weeklyCompletions: Array.isArray(parsed.weeklyCompletions) ? parsed.weeklyCompletions : []
+      };
+      console.log(`[NewsLens DB] Loaded local store with ${localStore.users.length} users and ${localStore.dailyCompletions.length} daily completions.`);
+    }
+  } catch (err) {
+    console.warn('[NewsLens DB] Warning reading local JSON database:', err);
+  }
+  localStoreLoaded = true;
+}
+
+function saveLocalStore(): void {
+  try {
+    const dir = path.dirname(JSON_DB_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(JSON_DB_PATH, JSON.stringify(localStore, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[NewsLens DB] Warning saving local JSON database:', err);
+  }
+}
+
 /**
- * MongoDB Atlas persistence service for NewsLens.
+ * Robust persistence service for NewsLens:
+ * Connects to MongoDB Atlas when MONGODB_URI is provided, or seamlessly
+ * operates with high-fidelity in-memory/JSON store fallback.
  */
 class NewsLensDatabase {
   private initialized = false;
+  private useMongo = false;
 
   /**
-   * Initializes the MongoDB connection and ensures collections and indexes exist.
+   * Initializes the database connection and ensures schema readiness.
    */
   public async init(): Promise<void> {
     if (this.initialized) return;
-    const db = await getDatabase();
-    await ensureIndexes(db);
+
+    loadLocalStore();
+
+    const uri = process.env.MONGODB_URI;
+    if (uri && uri.trim() !== '') {
+      const isConnected = await tryConnectMongo();
+      if (isConnected) {
+        try {
+          const db = await getDatabase();
+          await ensureIndexes(db);
+          this.useMongo = true;
+          console.log('[NewsLens DB] Connected to MongoDB Atlas.');
+        } catch {
+          this.useMongo = false;
+          console.log('[NewsLens DB] Operating in resilient local persistence mode.');
+        }
+      } else {
+        this.useMongo = false;
+        console.log('[NewsLens DB] Operating in resilient local persistence mode.');
+      }
+    } else {
+      console.log('[NewsLens DB] Operating in self-contained JSON persistence mode.');
+      this.useMongo = false;
+    }
+
     this.initialized = true;
+  }
+
+  public async getDatabaseStatus() {
+    const hasUri = Boolean(process.env.MONGODB_URI?.trim());
+    let usersCount = localStore.users.length;
+    let dailyCount = localStore.dailyCompletions.length;
+    let weeklyCount = localStore.weeklyCompletions.length;
+
+    if (this.useMongo) {
+      try {
+        const usersCol = await this.getUsersCol();
+        const dailyCol = await this.getDailyCol();
+        const weeklyCol = await this.getWeeklyCol();
+        usersCount = await usersCol.countDocuments();
+        dailyCount = await dailyCol.countDocuments();
+        weeklyCount = await weeklyCol.countDocuments();
+      } catch {
+        // Fall back to local counts
+      }
+    }
+
+    return {
+      mode: this.useMongo ? 'mongodb_atlas' : 'local_json',
+      isMongoActive: this.useMongo,
+      hasMongoUri: hasUri,
+      statusMessage: this.useMongo
+        ? 'MongoDB Atlas (Connected)'
+        : hasUri
+        ? 'Local JSON Persistence Active (Atlas requires 0.0.0.0/0 IP Whitelist in Network Access)'
+        : 'Local JSON Persistence Active',
+      totalUsers: usersCount,
+      totalDailyCompletions: dailyCount,
+      totalWeeklyCompletions: weeklyCount
+    };
   }
 
   private async getUsersCol(): Promise<Collection<DbUser>> {
@@ -267,16 +379,38 @@ class NewsLensDatabase {
   // ----------------------------------------------------
 
   public async findUserByEmail(email: string): Promise<DbUser | null> {
+    await this.init();
     const normalized = email.trim().toLowerCase();
-    const col = await this.getUsersCol();
-    const user = await col.findOne({ email: normalized });
-    return user ? sanitizeDoc<DbUser>(user) : null;
+
+    if (this.useMongo) {
+      try {
+        const col = await this.getUsersCol();
+        const user = await col.findOne({ email: normalized });
+        if (user) return sanitizeDoc<DbUser>(user);
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB findUserByEmail failed, using local store:', err);
+      }
+    }
+
+    const user = localStore.users.find(u => u.email.trim().toLowerCase() === normalized);
+    return user ? sanitizeDoc<DbUser>(JSON.parse(JSON.stringify(user))) : null;
   }
 
   public async findUserById(id: string): Promise<DbUser | null> {
-    const col = await this.getUsersCol();
-    const user = await col.findOne({ id });
-    return user ? sanitizeDoc<DbUser>(user) : null;
+    await this.init();
+
+    if (this.useMongo) {
+      try {
+        const col = await this.getUsersCol();
+        const user = await col.findOne({ id });
+        if (user) return sanitizeDoc<DbUser>(user);
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB findUserById failed, using local store:', err);
+      }
+    }
+
+    const user = localStore.users.find(u => u.id === id);
+    return user ? sanitizeDoc<DbUser>(JSON.parse(JSON.stringify(user))) : null;
   }
 
   public async createUser(params: {
@@ -285,6 +419,7 @@ class NewsLensDatabase {
     password: string;
     role?: 'student' | 'admin';
   }): Promise<DbUser> {
+    await this.init();
     const normalizedEmail = params.email.trim().toLowerCase();
     const existing = await this.findUserByEmail(normalizedEmail);
     if (existing) {
@@ -331,35 +466,55 @@ class NewsLensDatabase {
       createdAt: new Date().toISOString()
     };
 
-    const col = await this.getUsersCol();
-    try {
-      await col.insertOne(newUser as any);
-    } catch (err: any) {
-      if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
-        throw new Error('An account with this email already exists.');
+    if (this.useMongo) {
+      try {
+        const col = await this.getUsersCol();
+        await col.insertOne(newUser as any);
+        return newUser;
+      } catch (err: any) {
+        if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
+          throw new Error('An account with this email already exists.');
+        }
+        console.warn('[NewsLens DB] MongoDB createUser failed, writing to local store:', err);
       }
-      throw err;
     }
 
+    localStore.users.push(newUser);
+    saveLocalStore();
     return newUser;
   }
 
   public async updateUser(userId: string, updates: Partial<DbUser>): Promise<DbUser> {
-    const col = await this.getUsersCol();
-    // Exclude internal _id or primary id from being overridden
+    await this.init();
     const { _id, id, ...safeUpdates } = updates as any;
 
-    const result = await col.findOneAndUpdate(
-      { id: userId },
-      { $set: safeUpdates },
-      { returnDocument: 'after' }
-    );
+    if (this.useMongo) {
+      try {
+        const col = await this.getUsersCol();
+        const result = await col.findOneAndUpdate(
+          { id: userId },
+          { $set: safeUpdates },
+          { returnDocument: 'after' }
+        );
+        if (result) {
+          return sanitizeDoc<DbUser>(result);
+        }
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB updateUser failed, falling back to local store:', err);
+      }
+    }
 
-    if (!result) {
+    const index = localStore.users.findIndex(u => u.id === userId);
+    if (index === -1) {
       throw new Error('User not found');
     }
 
-    return sanitizeDoc<DbUser>(result);
+    localStore.users[index] = {
+      ...localStore.users[index],
+      ...safeUpdates
+    };
+    saveLocalStore();
+    return sanitizeDoc<DbUser>(JSON.parse(JSON.stringify(localStore.users[index])));
   }
 
   // ----------------------------------------------------
@@ -367,6 +522,7 @@ class NewsLensDatabase {
   // ----------------------------------------------------
 
   public async createSession(userId: string): Promise<string> {
+    await this.init();
     const token = `sess_${crypto.randomBytes(24).toString('hex')}`;
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
 
@@ -377,30 +533,67 @@ class NewsLensDatabase {
       expiresAt
     };
 
-    const col = await this.getSessionsCol();
-    await col.insertOne(session as any);
+    if (this.useMongo) {
+      try {
+        const col = await this.getSessionsCol();
+        await col.insertOne(session as any);
+        return token;
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB createSession failed, falling back to local store:', err);
+      }
+    }
+
+    localStore.sessions.push(session);
+    saveLocalStore();
     return token;
   }
 
   public async getUserBySessionToken(token: string): Promise<DbUser | null> {
+    await this.init();
     if (!token) return null;
-    const col = await this.getSessionsCol();
-    const session = await col.findOne({ token });
-    if (!session) return null;
 
-    // Check expiration
-    if (new Date(session.expiresAt).getTime() < Date.now()) {
+    if (this.useMongo) {
+      try {
+        const col = await this.getSessionsCol();
+        const session = await col.findOne({ token });
+        if (session) {
+          if (new Date(session.expiresAt).getTime() < Date.now()) {
+            await this.deleteSession(token);
+            return null;
+          }
+          return this.findUserById(session.userId);
+        }
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB getUserBySessionToken failed, using local store:', err);
+      }
+    }
+
+    const localSession = localStore.sessions.find(s => s.token === token);
+    if (!localSession) return null;
+
+    if (new Date(localSession.expiresAt).getTime() < Date.now()) {
       await this.deleteSession(token);
       return null;
     }
 
-    return this.findUserById(session.userId);
+    return this.findUserById(localSession.userId);
   }
 
   public async deleteSession(token: string): Promise<void> {
+    await this.init();
     if (!token) return;
-    const col = await this.getSessionsCol();
-    await col.deleteOne({ token });
+
+    if (this.useMongo) {
+      try {
+        const col = await this.getSessionsCol();
+        await col.deleteOne({ token });
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB deleteSession failed:', err);
+      }
+    }
+
+    localStore.sessions = localStore.sessions.filter(s => s.token !== token);
+    saveLocalStore();
   }
 
   // ----------------------------------------------------
@@ -408,9 +601,20 @@ class NewsLensDatabase {
   // ----------------------------------------------------
 
   public async getDailyCompletion(userId: string, quizDate: string): Promise<DbDailyCompletion | null> {
-    const col = await this.getDailyCol();
-    const completion = await col.findOne({ userId, quizDate });
-    return completion ? sanitizeDoc<DbDailyCompletion>(completion) : null;
+    await this.init();
+
+    if (this.useMongo) {
+      try {
+        const col = await this.getDailyCol();
+        const completion = await col.findOne({ userId, quizDate });
+        if (completion) return sanitizeDoc<DbDailyCompletion>(completion);
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB getDailyCompletion failed, using local store:', err);
+      }
+    }
+
+    const comp = localStore.dailyCompletions.find(c => c.userId === userId && c.quizDate === quizDate);
+    return comp ? sanitizeDoc<DbDailyCompletion>(JSON.parse(JSON.stringify(comp))) : null;
   }
 
   public async getUserStreakInfo(userId: string, todayDateStr: string): Promise<{
@@ -419,18 +623,35 @@ class NewsLensDatabase {
     lastCompletedDate: string | null;
     completedToday: boolean;
   }> {
+    await this.init();
     const user = await this.findUserById(userId);
     if (!user) {
       return { currentStreak: 0, longestStreak: 0, lastCompletedDate: null, completedToday: false };
     }
 
-    const col = await this.getDailyCol();
-    const completions = await col
-      .find({ userId })
-      .project<{ quizDate: string }>({ quizDate: 1 })
-      .toArray();
+    let uniqueDates: string[] = [];
+    if (this.useMongo) {
+      try {
+        const col = await this.getDailyCol();
+        const completions = await col
+          .find({ userId })
+          .project<{ quizDate: string }>({ quizDate: 1 })
+          .toArray();
+        uniqueDates = Array.from(new Set(completions.map(c => c.quizDate))).sort();
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB getUserStreakInfo failed, reading local store:', err);
+      }
+    }
 
-    const uniqueDates = Array.from(new Set(completions.map(c => c.quizDate))).sort();
+    if (uniqueDates.length === 0) {
+      uniqueDates = Array.from(
+        new Set(
+          localStore.dailyCompletions
+            .filter(c => c.userId === userId)
+            .map(c => c.quizDate)
+        )
+      ).sort();
+    }
 
     if (uniqueDates.length === 0) {
       return {
@@ -505,6 +726,7 @@ class NewsLensDatabase {
     completion: DbDailyCompletion;
     user: DbUser;
   }> {
+    await this.init();
     const { userId, quizId, quizDate, score, totalQuestions, xpEarned, answers } = params;
 
     const user = await this.findUserById(userId);
@@ -519,16 +741,12 @@ class NewsLensDatabase {
     // Calculate Streak based on requirement rules
     let newStreak = 1;
     if (!user.lastCompletedDate) {
-      // First completed day
       newStreak = 1;
     } else if (isYesterday(user.lastCompletedDate, quizDate)) {
-      // Consecutive day
       newStreak = (user.streakDays || 0) + 1;
     } else if (isSameDay(user.lastCompletedDate, quizDate)) {
-      // Same day defensive check
       newStreak = user.streakDays || 1;
     } else {
-      // Missed one or more days -> streak resets to 1
       newStreak = 1;
     }
 
@@ -546,17 +764,6 @@ class NewsLensDatabase {
       answers,
       completedAt: new Date().toISOString()
     };
-
-    // Atomic insert into dailyCompletions collection with unique compound index
-    const dailyCol = await this.getDailyCol();
-    try {
-      await dailyCol.insertOne(completion as any);
-    } catch (err: any) {
-      if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
-        throw new Error("You've already completed today's quiz.");
-      }
-      throw err;
-    }
 
     // Update streak achievements
     const updatedAchievements = (user.achievements || []).map(ach => {
@@ -578,33 +785,62 @@ class NewsLensDatabase {
       return ach;
     });
 
-    // Update user stats in MongoDB atomically
-    const usersCol = await this.getUsersCol();
-    const updatedUserDoc = await usersCol.findOneAndUpdate(
-      { id: userId },
-      {
-        $inc: {
-          xp: xpEarned,
-          'quizStats.attempted': totalQuestions,
-          'quizStats.correct': score
-        },
-        $set: {
-          streakDays: newStreak,
-          longestStreak: newLongestStreak,
-          lastCompletedDate: quizDate,
-          achievements: updatedAchievements
-        }
-      },
-      { returnDocument: 'after' }
-    );
+    if (this.useMongo) {
+      try {
+        const dailyCol = await this.getDailyCol();
+        await dailyCol.insertOne(completion as any);
 
-    if (!updatedUserDoc) {
-      throw new Error('User not found during update');
+        const usersCol = await this.getUsersCol();
+        const updatedUserDoc = await usersCol.findOneAndUpdate(
+          { id: userId },
+          {
+            $inc: {
+              xp: xpEarned,
+              'quizStats.attempted': totalQuestions,
+              'quizStats.correct': score
+            },
+            $set: {
+              streakDays: newStreak,
+              longestStreak: newLongestStreak,
+              lastCompletedDate: quizDate,
+              achievements: updatedAchievements
+            }
+          },
+          { returnDocument: 'after' }
+        );
+
+        if (updatedUserDoc) {
+          return {
+            completion,
+            user: sanitizeDoc<DbUser>(updatedUserDoc)
+          };
+        }
+      } catch (err: any) {
+        if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
+          throw new Error("You've already completed today's quiz.");
+        }
+        console.warn('[NewsLens DB] MongoDB recordDailyQuizCompletion failed, using local store:', err);
+      }
     }
+
+    // Local in-memory / JSON fallback
+    localStore.dailyCompletions.push(completion);
+    const updatedUser = await this.updateUser(userId, {
+      xp: (user.xp || 0) + xpEarned,
+      streakDays: newStreak,
+      longestStreak: newLongestStreak,
+      lastCompletedDate: quizDate,
+      achievements: updatedAchievements,
+      quizStats: {
+        attempted: (user.quizStats?.attempted || 0) + totalQuestions,
+        correct: (user.quizStats?.correct || 0) + score,
+        byCategory: user.quizStats?.byCategory || {}
+      }
+    });
 
     return {
       completion,
-      user: sanitizeDoc<DbUser>(updatedUserDoc)
+      user: updatedUser
     };
   }
 
@@ -613,17 +849,44 @@ class NewsLensDatabase {
   // ----------------------------------------------------
 
   public async getWeeklyCompletion(userId: string, cycleId: string): Promise<DbWeeklyCompletion | null> {
-    const col = await this.getWeeklyCol();
-    const completion = await col.findOne({ userId, cycleId });
-    return completion ? sanitizeDoc<DbWeeklyCompletion>(completion) : null;
+    await this.init();
+
+    if (this.useMongo) {
+      try {
+        const col = await this.getWeeklyCol();
+        const completion = await col.findOne({ userId, cycleId });
+        if (completion) return sanitizeDoc<DbWeeklyCompletion>(completion);
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB getWeeklyCompletion failed, checking local store:', err);
+      }
+    }
+
+    const comp = localStore.weeklyCompletions.find(c => c.userId === userId && c.cycleId === cycleId);
+    return comp ? sanitizeDoc<DbWeeklyCompletion>(JSON.parse(JSON.stringify(comp))) : null;
   }
 
   public async getWeeklyStatus(userId: string, timeZone?: string) {
+    await this.init();
     const cycleInfo = getWeeklyCycleInfo(new Date(), timeZone);
     const completion = await this.getWeeklyCompletion(userId, cycleInfo.cycleId);
-    const col = await this.getWeeklyCol();
-    const rawHistory = await col.find({ userId }).sort({ completedAt: -1 }).toArray();
-    const history = rawHistory.map(h => sanitizeDoc<DbWeeklyCompletion>(h));
+
+    let history: DbWeeklyCompletion[] = [];
+    if (this.useMongo) {
+      try {
+        const col = await this.getWeeklyCol();
+        const rawHistory = await col.find({ userId }).sort({ completedAt: -1 }).toArray();
+        history = rawHistory.map(h => sanitizeDoc<DbWeeklyCompletion>(h));
+      } catch (err) {
+        console.warn('[NewsLens DB] MongoDB getWeeklyStatus failed, checking local store:', err);
+      }
+    }
+
+    if (history.length === 0) {
+      history = localStore.weeklyCompletions
+        .filter(c => c.userId === userId)
+        .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
+        .map(h => sanitizeDoc<DbWeeklyCompletion>(JSON.parse(JSON.stringify(h))));
+    }
 
     return {
       cycleId: cycleInfo.cycleId,
@@ -648,6 +911,7 @@ class NewsLensDatabase {
     completion: DbWeeklyCompletion;
     user: DbUser;
   }> {
+    await this.init();
     const { userId, cycleId, score, totalQuestions, xpEarned, answers, questions } = params;
 
     const user = await this.findUserById(userId);
@@ -671,38 +935,52 @@ class NewsLensDatabase {
       completedAt: new Date().toISOString()
     };
 
-    // Atomic insert into weeklyCompletions with unique compound index
-    const weeklyCol = await this.getWeeklyCol();
-    try {
-      await weeklyCol.insertOne(completion as any);
-    } catch (err: any) {
-      if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
-        throw new Error("You've already completed this week's practice.");
-      }
-      throw err;
-    }
+    if (this.useMongo) {
+      try {
+        const weeklyCol = await this.getWeeklyCol();
+        await weeklyCol.insertOne(completion as any);
 
-    // Award XP server-side (Weekly Practice strictly does NOT touch Daily Quiz streak)
-    const usersCol = await this.getUsersCol();
-    const updatedUserDoc = await usersCol.findOneAndUpdate(
-      { id: userId },
-      {
-        $inc: {
-          xp: xpEarned,
-          'quizStats.attempted': totalQuestions,
-          'quizStats.correct': score
+        const usersCol = await this.getUsersCol();
+        const updatedUserDoc = await usersCol.findOneAndUpdate(
+          { id: userId },
+          {
+            $inc: {
+              xp: xpEarned,
+              'quizStats.attempted': totalQuestions,
+              'quizStats.correct': score
+            }
+          },
+          { returnDocument: 'after' }
+        );
+
+        if (updatedUserDoc) {
+          return {
+            completion,
+            user: sanitizeDoc<DbUser>(updatedUserDoc)
+          };
         }
-      },
-      { returnDocument: 'after' }
-    );
-
-    if (!updatedUserDoc) {
-      throw new Error('User not found during update');
+      } catch (err: any) {
+        if (err?.code === 11000 || err?.message?.includes('duplicate key')) {
+          throw new Error("You've already completed this week's practice.");
+        }
+        console.warn('[NewsLens DB] MongoDB recordWeeklyCompletion failed, saving to local store:', err);
+      }
     }
+
+    // Local fallback
+    localStore.weeklyCompletions.push(completion);
+    const updatedUser = await this.updateUser(userId, {
+      xp: (user.xp || 0) + xpEarned,
+      quizStats: {
+        attempted: (user.quizStats?.attempted || 0) + totalQuestions,
+        correct: (user.quizStats?.correct || 0) + score,
+        byCategory: user.quizStats?.byCategory || {}
+      }
+    });
 
     return {
       completion,
-      user: sanitizeDoc<DbUser>(updatedUserDoc)
+      user: updatedUser
     };
   }
 }

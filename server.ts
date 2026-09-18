@@ -213,14 +213,16 @@ app.get('/api/auth/me', async (req: Request, res: Response) => {
 // APPLICATION API ROUTES
 // ----------------------------------------------------
 
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/health', async (req: Request, res: Response) => {
   const articlesList = newsService.getArticles();
+  const dbStatus = await db.getDatabaseStatus();
   res.json({
     status: 'ok',
     appName: 'NewsLens',
     articlesCount: articlesList.length,
     hasNewsApiKey: Boolean(process.env.NEWS_API_KEY && process.env.NEWS_API_KEY !== 'MY_NEWS_API_KEY'),
     hasGeminiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
+    db: dbStatus,
     lastFetchedAt: newsService.getLastFetchedAt()
   });
 });
@@ -872,20 +874,14 @@ async function startServer() {
     console.log(`NewsLens server running on http://0.0.0.0:${PORT}`);
   });
 
-  // Check and initialize MongoDB Atlas connection
-  if (process.env.MONGODB_URI) {
-    db.init()
-      .then(() => {
-        console.log('[MongoDB] Connected to database: newslens');
-      })
-      .catch((err: any) => {
-        console.error('[MongoDB] Connection error:', err?.message || err);
-      });
-  } else {
-    console.warn(
-      '[MongoDB] ⚠️ WARNING: MONGODB_URI is not set. Database persistence requires MONGODB_URI in your server environment.'
-    );
-  }
+  // Initialize NewsLens database persistence (MongoDB Atlas with local JSON fallback)
+  db.init()
+    .then(() => {
+      console.log('[NewsLens DB] Persistence layer initialized.');
+    })
+    .catch((err: any) => {
+      console.error('[NewsLens DB] Initialization error:', err?.message || err);
+    });
 }
 
 startServer();
